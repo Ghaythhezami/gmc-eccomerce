@@ -1,0 +1,25 @@
+{
+  "name": "ecommerce-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @ecommerce/client --filter @ecommerce/admin --filter @ecommerce/server dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @ecommerce/server prisma:migrate",
+    "db:seed": "pnpm --filter @ecommerce/server prisma:seed",
+    "db:studio": "pnpm --filter @ecommerce/server prisma:studio",
+    "prepare": "husky",
+    "lint-staged": { "*.{ts,tsx,js,jsx}": "eslint --fix", "*.{md,json,css}": "prettier --write" }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2"
+  }
+}
