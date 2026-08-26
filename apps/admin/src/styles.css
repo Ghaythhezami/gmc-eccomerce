@@ -1,2 +1,220 @@
+
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
-:root{font-family:'DM Sans',sans-serif;color:#24251f;background:#e8e9e3}*{box-sizing:border-box}body{margin:0}main{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}aside{background:#20231f;color:#f5f1e8;padding:32px 24px}aside strong{font-family:'Space Grotesk',sans-serif;font-size:14px}nav{display:grid;gap:8px;margin-top:70px}nav a{padding:10px 0;color:#bfc3b8;text-decoration:none}nav a:hover{color:#e3b85b}article{padding:10vh 8vw;max-width:900px}h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,7vw,88px);line-height:1;margin:18px 0}.eyebrow{color:#a34f32;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700}.todo{border-left:3px solid #e3b85b;padding:14px;background:#f5f1e8}@media(max-width:700px){main{grid-template-columns:1fr}aside{padding:20px}nav{display:flex;gap:16px;overflow:auto;margin-top:24px}article{padding:50px 24px}}
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #24251f;
+  background: #e8e9e3;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+/* ---------------------------
+   Admin Layout (Sidebar + Content)
+--------------------------- */
+main {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+aside {
+  background: #20231f;
+  color: #f5f1e8;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+aside strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+nav {
+  display: grid;
+  gap: 8px;
+  margin-top: 70px;
+}
+
+nav a {
+  padding: 10px 0;
+  color: #bfc3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+nav a:hover { color: #e3b85b; }
+
+aside button {
+  margin-top: auto;
+  background: #a34f32;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+aside button:hover { background: #8b3f25; }
+
+article {
+  padding: 10vh 8vw;
+  max-width: 900px;
+}
+
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(44px, 7vw, 88px);
+  line-height: 1;
+  margin: 18px 0;
+}
+
+/* ---------------------------
+   Eyebrow & Todo
+--------------------------- */
+.eyebrow {
+  color: #a34f32;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.todo {
+  border-left: 3px solid #e3b85b;
+  padding: 14px;
+  background: #f5f1e8;
+}
+
+/* ---------------------------
+   Admin Login Page (Uses .form)
+--------------------------- */
+.form {
+  max-width: 400px;
+  margin: 10vh auto;
+  padding: 40px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.form h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  margin-bottom: 24px;
+}
+
+.form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font: inherit;
+  background: #fafafa;
+}
+
+.form input:focus {
+  outline: none;
+  border-color: #a34f32;
+  box-shadow: 0 0 0 3px rgba(163, 79, 50, 0.1);
+}
+
+.form button {
+  width: 100%;
+  background: #a34f32;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.form button:hover { background: #8b3f25; }
+.form button:disabled { opacity: 0.6; }
+
+.form .error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.form p {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.form a { color: #a34f32; }
+
+/* ---------------------------
+   Admin Users Table
+--------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+th {
+  background: #f5f1e8;
+  color: #24251f;
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+td button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+td button:hover { background: #c82333; }
+
+/* ---------------------------
+   Responsive Design
+--------------------------- */
+@media (max-width: 700px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+  aside {
+    padding: 20px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  nav {
+    display: flex;
+    gap: 16px;
+    overflow: auto;
+    margin-top: 0;
+  }
+  nav a { padding: 0 10px; }
+  aside button { margin-top: 0; }
+  article { padding: 50px 24px; }
+}

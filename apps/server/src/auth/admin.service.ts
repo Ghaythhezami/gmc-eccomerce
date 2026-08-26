@@ -1,0 +1,66 @@
+// apps/server/src/auth/admin.service.ts
+import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+  ) {}
+
+  // Admin-specific login
+  async adminLogin(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid admin credentials');
+    }
+
+    // HARD BLOCK: Only allow ADMINS to use this login
+    if (user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Not authorized for admin access');
+    }
+
+    return {
+      user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role },
+      accessToken: this.jwt.sign({ sub: user.id, email: user.email, role: user.role }),
+    };
+  }
+
+  // Admin-specific registration (ONLY use this in development, or use a seed script)
+  async adminRegister(dto: any) {
+    const existing = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
+    if (existing) throw new ConflictException('Email is already registered');
+
+    const user = await this.prisma.user.create({
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        email: dto.email.toLowerCase(),
+        passwordHash: await bcrypt.hash(dto.password, 10),
+        role: 'ADMIN', // <-- Directly set to ADMIN!
+      },
+    });
+
+    return {
+      user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role },
+      accessToken: this.jwt.sign({ sub: user.id, email: user.email, role: user.role }),
+    };
+  }
+
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      select: { id: true, firstName: true, lastName: true, email: true, role: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async deleteUser(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.prisma.user.delete({ where: { id } });
+  }
+}
