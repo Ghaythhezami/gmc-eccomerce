@@ -7,8 +7,9 @@ import { Users } from './pages/Users';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
 import { AdminLayout } from './AdminLayout';
+import { CategoriesPage } from './features/categories/CategoriesPage';
 
-const pages = ['Products', 'Categories', 'Orders', 'Notifications'];
+const pages = ['Products', 'Orders', 'Notifications'];
 
 export function App() {
   return (
@@ -16,16 +17,17 @@ export function App() {
       {/* Public routes for Admin Auth */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Register />} />
-      
+
       {/* Protected routes for Admin Dashboard */}
       <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         {pages.map((page) => (
           <Route key={page} path={`/${page.toLowerCase()}`} element={<Placeholder name={page} />} />
         ))}
       </Route>
-      
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
