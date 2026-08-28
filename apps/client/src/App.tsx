@@ -18,9 +18,12 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Shell } from './components/Shell';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
+import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
+import { OrdersPage } from './features/orders/OrdersPage';
+import { OrderDetailPage } from './features/orders/OrderDetailPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 export function App() {
@@ -29,10 +32,11 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/products/:id" element={<Placeholder name="Product details" />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Placeholder name="Cart" />} />
         <Route path="/checkout" element={<ProtectedRoute roles={['CUSTOMER']}><Placeholder name="Checkout" /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute roles={['CUSTOMER']}><Placeholder name="Orders" /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute roles={['CUSTOMER']}><OrdersPage /></ProtectedRoute>} />
+        <Route path="/orders/:id" element={<ProtectedRoute roles={['CUSTOMER']}><OrderDetailPage /></ProtectedRoute>} />
         <Route path="/login" element={<AuthPage register={false} />} />
         <Route path="/register" element={<AuthPage register />} />
         <Route path="/profile" element={<ProtectedRoute roles={['CUSTOMER']}><Profile /></ProtectedRoute>} />

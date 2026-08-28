@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, User, HelpCircle, Search, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { GoMyCodeGamesLogo } from '../GoMyCodeGamesLogo';
+import { NotificationBell } from '../../features/notifications/NotificationBell';
 
 interface HeaderProps {
   user: any;
@@ -73,6 +74,9 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
                 </button>
               )}
             </div>
+
+            {/* Real-time notification bell (signed-in customers only) */}
+            {user && <NotificationBell />}
 
             {/* Always Visible: Cart */}
             <Link to="/cart" className="flex flex-col items-center text-xs font-medium text-[#20231f] hover:text-[#a34f32] transition-colors px-1 sm:px-2 relative">
