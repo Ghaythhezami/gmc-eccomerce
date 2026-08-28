@@ -21,6 +21,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  ORDER_STATUS
+  LOW_STOCK
+  PROMO
+}
+
 model User {
   id            String         @id @default(cuid())
   firstName     String
@@ -31,6 +37,7 @@ model User {
   cart          Cart?
   orders        Order[]
   notifications Notification[]
+  reviews       Review[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   @@index([role])
@@ -57,6 +64,7 @@ model Product {
   category    Category    @relation(fields: [categoryId], references: [id])
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  reviews     Review[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   @@index([categoryId])
@@ -104,12 +112,29 @@ model OrderItem {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
+  type      NotificationType @default(PROMO)
   title     String
   message   String
+  orderId   String?
   readAt    DateTime?
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  comment   String?
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  @@index([userId, readAt])
+  updatedAt DateTime @updatedAt
+  @@unique([productId, userId])
+  @@index([productId])
 }
