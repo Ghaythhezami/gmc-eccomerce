@@ -6,6 +6,10 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
+import { Notifications } from './pages/Notifications';
+import { NotificationBell } from './features/notifications/NotificationBell';
+import { ToastHost } from './features/notifications/ToastHost';
+import { useNotificationsSocket } from './features/notifications/useNotificationsSocket';
 import { 
   LayoutDashboard, 
   Users as UsersIcon, 
@@ -28,11 +32,17 @@ const pages = [
   { name: 'Notifications', path: '/notifications', icon: Bell },
 ];
 
+/** Pages that have a real implementation rather than the ticket placeholder. */
+const placeholderPages = pages.filter((page) => page.path !== '/notifications');
+
 export function AdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const location = useLocation();
+
+  // One authenticated Socket.IO connection for the admin (low-stock alerts).
+  useNotificationsSocket();
 
   const signOut = () => {
     dispatch(logout());
@@ -161,9 +171,12 @@ export function AdminLayout() {
             </h1>
           </div>
 
-          <div className="text-xs text-text/70 bg-surface px-3.5 py-2 rounded-lg border border-border shadow-2xs flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Connected as <strong className="text-text">{user?.email}</strong></span>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <div className="text-xs text-text/70 bg-surface px-3.5 py-2 rounded-lg border border-border shadow-2xs flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Connected as <strong className="text-text">{user?.email}</strong></span>
+            </div>
           </div>
         </header>
 
@@ -171,16 +184,19 @@ export function AdminLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
-            {pages.map((page) => (
-              <Route 
-                key={page.name} 
-                path={page.path} 
-                element={<Placeholder name={page.name} />} 
+            <Route path="/notifications" element={<Notifications />} />
+            {placeholderPages.map((page) => (
+              <Route
+                key={page.name}
+                path={page.path}
+                element={<Placeholder name={page.name} />}
               />
             ))}
           </Routes>
         </main>
       </article>
+
+      <ToastHost />
     </div>
   );
 }
