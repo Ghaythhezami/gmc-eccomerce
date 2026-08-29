@@ -3,6 +3,7 @@ import { Injectable, ConflictException, NotFoundException, UnauthorizedException
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
@@ -62,5 +63,30 @@ export class AdminService {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     return this.prisma.user.delete({ where: { id } });
+  }
+
+    // Get current storefront allowed roles (default to CUSTOMER)
+  async getStorefrontAccess() {
+    const access = await this.prisma.storefrontAccess.findFirst();
+    return { allowedRoles: access?.allowedRoles ?? ['CUSTOMER'] };
+  }
+
+  // Update allowed roles (admin only)
+  async updateStorefrontAccess(allowedRoles: string[]) {
+    const existing = await this.prisma.storefrontAccess.findFirst();
+    if (existing) {
+      return this.prisma.storefrontAccess.update({
+        where: { id: existing.id },
+        data: { allowedRoles },
+      });
+    }
+    return this.prisma.storefrontAccess.create({
+      data: { allowedRoles },
+    });
+  }
+
+  async getAllRoles() {
+    // Return all enum values from Prisma
+    return Object.values(Role);
   }
 }

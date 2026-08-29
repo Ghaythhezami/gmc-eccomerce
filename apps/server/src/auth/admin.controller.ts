@@ -1,5 +1,5 @@
 // apps/server/src/auth/admin.controller.ts
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -49,5 +49,33 @@ export class AdminController {
   @ApiOperation({ summary: 'Delete a user' })
   deleteUser(@Param('id') id: string) {
     return this.adminService.deleteUser(id);
+  }
+
+    // PUBLIC: Client app needs to fetch this without login
+  @Get('storefront-access')
+  @ApiOperation({ summary: 'Get allowed storefront roles (Public)' })
+  getStorefrontAccess() {
+    return this.adminService.getStorefrontAccess();
+    //  return { allowedRoles: access?.allowedRoles ?? ['CUSTOMER'] }; // Default to CUSTOMER
+  }
+
+  // PROTECTED: Only admin can update the allowed roles
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Put('storefront-access')
+  @ApiOperation({ summary: 'Update allowed storefront roles' })
+  updateStorefrontAccess(@Body() body: { allowedRoles: string[] }) {
+    return this.adminService.updateStorefrontAccess(body.allowedRoles);
+  }
+
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('roles')
+  @ApiOperation({ summary: 'Get all available roles' })
+  getAllRoles() {
+    return this.adminService.getAllRoles();
   }
 }
