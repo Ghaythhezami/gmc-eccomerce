@@ -52,11 +52,35 @@ export class AdminService {
     };
   }
 
-  async getAllUsers() {
-    return this.prisma.user.findMany({
-      select: { id: true, firstName: true, lastName: true, email: true, role: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-    });
+
+ async getAllUsers(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        skip,
+        take,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      data: users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async deleteUser(id: string) {

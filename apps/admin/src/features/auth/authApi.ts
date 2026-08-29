@@ -22,8 +22,8 @@ export const authApi = createApi({
     register: builder.mutation<{ user: any; accessToken: string }, any>({
       query: (body) => ({ url: 'admin/auth/register', method: 'POST', body }),
     }),
-    getUsers: builder.query<any[], void>({
-      query: () => 'admin/users',
+    getUsers: builder.query<{ data: any[]; total: number; page: number; limit: number; totalPages: number }, { page?: number; limit?: number }>({
+      query: ({ page = 1, limit = 10 }) => `admin/users?page=${page}&limit=${limit}`,
       providesTags: ['Users'],
     }),
     deleteUser: builder.mutation<void, string>({

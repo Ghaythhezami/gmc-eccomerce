@@ -39,7 +39,7 @@ export function AuthPage({ register }: { register: boolean }) {
         : await login({ email: form.email, password: form.password }).unwrap();
       
       dispatch(setCredentials(result));
-      navigate('/profile');
+      navigate('/');
     } catch (err) {
       // Handled via RTK Query state
     }
