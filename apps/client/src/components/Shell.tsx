@@ -7,12 +7,22 @@ import { CategoryNav } from './layout/CategoryNav';
 import { Footer } from './layout/Footer';
 import { Header } from './layout/Header';
 import { TopBar } from './layout/TopBar';
+// 1. Import the API to fetch allowed roles
+import { useGetStorefrontAccessQuery } from '../features/storefront/storefrontApi';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
-  const cartCount = useAppSelector((s) => s.cart?.items?.length || 0);
+  
+  // 2. DUMMY CART COUNT (since `s.cart` doesn't exist yet, we use 0)
+  const cartCount = 0; 
+
+  // 3. Fetch allowed roles dynamically from the backend
+  const { data: accessData, isLoading: isAccessLoading } = useGetStorefrontAccessQuery();
+  
+  // Fallback to CUSTOMER while loading or if API fails
+  const allowedRoles = accessData?.allowedRoles ?? ['CUSTOMER'];
 
   const signOut = () => {
     dispatch(logout());
@@ -20,7 +30,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     navigate('/login');
   };
 
-  if (user && (user.role === 'ADMIN')) {
+  // 4. DYNAMIC CHECK: Block if user role is NOT in the allowed list (controlled by Admin)
+  if (user && !allowedRoles.includes(user.role)) {
     return <UnauthorizedView onSignOut={signOut} />;
   }
 
