@@ -1,3 +1,4 @@
+// apps/admin/src/AdminLayout.tsx
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { logout } from './features/auth/authSlice';
@@ -6,6 +7,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
+import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { 
   LayoutDashboard, 
   Users as UsersIcon, 
@@ -18,7 +20,8 @@ import {
   Gamepad2,
   Menu,
   X,
-  UserCircle
+  UserCircle,
+  Settings2,
 } from 'lucide-react';
 
 const pages = [
@@ -112,6 +115,15 @@ export function AdminLayout() {
               <span>Users Management</span>
             </Link>
 
+            <Link 
+              to="/storefront-access" 
+              onClick={() => setMobileMenuOpen(false)}
+              className={navLinkClasses('/storefront-access')}
+            >
+              <Settings2 size={18} />
+              <span>Storefront Access</span>
+            </Link>
+
             {pages.map((page) => {
               const IconComponent = page.icon;
               return (
@@ -171,6 +183,7 @@ export function AdminLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/storefront-access" element={<StorefrontAccess />} /> {/* <-- Add this! */}
             {pages.map((page) => (
               <Route 
                 key={page.name} 
