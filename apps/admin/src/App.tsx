@@ -6,6 +6,7 @@ import { Register } from './pages/Register';
 import { Users } from './pages/Users';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
+import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { AdminLayout } from './AdminLayout';
 import { CategoriesPage } from './features/categories/CategoriesPage';
 
@@ -23,6 +24,7 @@ export function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/users" element={<Users />} />
         <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/storefront-access" element={<StorefrontAccess />} /> {/* <-- New */}
         {pages.map((page) => (
           <Route key={page} path={`/${page.toLowerCase()}`} element={<Placeholder name={page} />} />
         ))}
