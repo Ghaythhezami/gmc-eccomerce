@@ -1,10 +1,12 @@
 // src/App.tsx
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Shell } from './components/Shell';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
+import { Notifications } from './pages/Notifications';
+import { NotFound } from './pages/NotFound';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -40,9 +42,10 @@ export function App() {
         <Route path="/checkout" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Checkout" /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Orders" /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute roles={allowedRoles}><Profile /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute roles={allowedRoles}><Notifications /></ProtectedRoute>} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* A real 404 - the old catch-all redirect hid genuine dead links. */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Shell>
   );

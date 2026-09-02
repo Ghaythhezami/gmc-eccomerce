@@ -1,140 +1,199 @@
-// apps/client/src/pages/Dashboard.tsx
-import { 
-  Users, 
-  Package, 
-  ShoppingBag, 
-  Activity, 
-  TrendingUp, 
-  CheckCircle2, 
-  Clock, 
-  Radio
+// apps/admin/src/pages/Dashboard.tsx
+import { Link } from 'react-router-dom';
+import {
+  AlertTriangle,
+  BellRing,
+  FolderTree,
+  Package,
+  PackageX,
+  ShoppingBag,
+  Users as UsersIcon,
+  Warehouse,
 } from 'lucide-react';
-import { useGetUsersQuery } from '../features/auth/authApi';
+import { useGetStatsQuery } from '../features/auth/authApi';
 
-export function Dashboard() {
-  const { data: users = [] } = useGetUsersQuery();
+const money = (value: number) => `$${value.toFixed(2)}`;
 
-  const stats = [
-    {
-      title: 'Total Users',
-      value: users.length || 3,
-      change: '+12.5%',
-      description: 'Active administrative & customer profiles',
-      icon: Users,
-    },
-    {
-      title: 'Total Products',
-      value: '0',
-      change: '0.0%',
-      description: 'Catalog items & inventory SKUs',
-      icon: Package,
-    },
-    {
-      title: 'Total Orders',
-      value: '0',
-      change: '0.0%',
-      description: 'Completed store transactions',
-      icon: ShoppingBag,
-    },
-  ];
+function StatCard({
+  label,
+  value,
+  detail,
+  icon: Icon,
+  tone = 'default',
+}: {
+  label: string;
+  value: string | number;
+  detail: string;
+  icon: typeof Package;
+  tone?: 'default' | 'warn' | 'danger';
+}) {
+  const tones = {
+    default: 'bg-primary/10 text-primary',
+    warn: 'bg-amber-100 text-amber-700',
+    danger: 'bg-red-100 text-red-700',
+  } as const;
 
   return (
-    <div className="w-full mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-4 border-b border-border">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            Operations Overview
-          </span>
-          <h2 className="text-3xl font-bold text-text mt-1">
-            Executive Summary
-          </h2>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full text-xs font-bold shrink-0">
-          <Radio size={14} className="text-primary" />
-          <span className="whitespace-nowrap">Real-time Telemetry Active</span>
-        </div>
+    <div className="flex flex-col justify-between rounded-xl border border-admin-border bg-admin-surface p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-xs font-bold uppercase tracking-wide text-admin-text/60">{label}</span>
+        <span className={`flex rounded-lg p-2 ${tones[tone]}`}>
+          <Icon size={18} />
+        </span>
       </div>
-
-      {/* Top 3 Stat Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div 
-              key={stat.title}
-              className="bg-bg border border-border rounded-xl p-6 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wide text-gray-600">
-                    {stat.title}
-                  </span>
-                  <div className="p-2 bg-primary/10 rounded-lg text-primary flex">
-                    <Icon size={20} />
-                  </div>
-                </div>
-                <div className="flex items-baseline gap-3 mb-2">
-                  <span className="text-4xl font-extrabold text-text">
-                    {stat.value}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-500/15 px-2 py-1 rounded-full">
-                    <TrendingUp size={12} />
-                    {stat.change}
-                  </span>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mt-4 pt-4 border-t border-border/50">
-                {stat.description}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        {/* System Architecture Box */}
-        <div className="lg:col-span-2 bg-surface border border-border rounded-xl p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase mb-3">
-              <Activity size={18} />
-              <span>System Architecture Status</span>
-            </div>
-            <p className="text-sm text-gray-700 leading-relaxed mb-5">
-              RTK Query state management connected to microservice infrastructure. Operations telemetry actively monitoring authentication and route authorization bounds.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-bold">
-              <CheckCircle2 size={14} />
-              Services Operational
-            </span>
-            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-bg border border-border text-gray-600 text-xs">
-              <Clock size={14} />
-              Latency: 24ms
-            </span>
-          </div>
-        </div>
-
-        {/* Action Card */}
-        <div className="bg-bg border border-border rounded-r-xl border-l-4 border-l-amber-400 p-6 flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              Action Required
-            </span>
-            <h3 className="text-xl font-bold text-text mt-1 mb-2">
-              Platform Deployments
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Select an active operational ticket to deploy vertical platform enhancements across services.
-            </p>
-          </div>
-          <button className="mt-6 w-full py-3 bg-primary text-white border-none rounded-lg font-bold text-xs uppercase cursor-pointer hover:bg-primary-hover transition-colors">
-            Manage Services
-          </button>
-        </div>
-      </div>
+      <div className="font-display text-3xl font-extrabold text-admin-text">{value}</div>
+      <p className="mt-2 border-t border-admin-border/60 pt-2 text-xs text-admin-text/60">{detail}</p>
     </div>
+  );
+}
+
+export function Dashboard() {
+  const { data: stats, isLoading, isError } = useGetStatsQuery();
+
+  if (isLoading) {
+    return (
+      <section>
+        <p className="eyebrow">Admin / Overview</p>
+        <h1 className="font-display text-2xl font-extrabold">Dashboard</h1>
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="h-[132px] animate-pulse rounded-xl bg-admin-card" />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (isError || !stats) {
+    return (
+      <section>
+        <p className="eyebrow">Admin / Overview</p>
+        <h1 className="font-display text-2xl font-extrabold">Dashboard</h1>
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
+          Could not load dashboard statistics. Check that the API is running on port 3000.
+        </div>
+      </section>
+    );
+  }
+
+  const needsAttention = stats.products.outOfStock > 0 || stats.products.lowStock > 0;
+
+  return (
+    <section>
+      <div className="mb-6">
+        <p className="eyebrow">Admin / Overview</p>
+        <h1 className="font-display text-2xl font-extrabold">Dashboard</h1>
+        <p className="mt-1 text-sm text-admin-text/70">Live counts straight from the database.</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Products"
+          value={stats.products.total}
+          detail={`${stats.products.active} live · ${stats.products.hidden} hidden`}
+          icon={Package}
+        />
+        <StatCard
+          label="Categories"
+          value={stats.categories.total}
+          detail={`${stats.categories.active} visible on the storefront`}
+          icon={FolderTree}
+        />
+        <StatCard
+          label="Users"
+          value={stats.users.total}
+          detail={`${stats.users.admins} admin · ${stats.users.customers} customer`}
+          icon={UsersIcon}
+        />
+        <StatCard
+          label="Orders"
+          value={stats.orders.total}
+          detail="Populated once FEATURE-005 ships"
+          icon={ShoppingBag}
+        />
+        <StatCard
+          label="Units in stock"
+          value={stats.inventory.unitsInStock}
+          detail={`Average price ${money(stats.inventory.averagePrice)}`}
+          icon={Warehouse}
+        />
+        <StatCard
+          label="Low stock"
+          value={stats.products.lowStock}
+          detail="Products with 1–5 units left"
+          icon={AlertTriangle}
+          tone={stats.products.lowStock > 0 ? 'warn' : 'default'}
+        />
+        <StatCard
+          label="Out of stock"
+          value={stats.products.outOfStock}
+          detail="Shown as unavailable on the storefront"
+          icon={PackageX}
+          tone={stats.products.outOfStock > 0 ? 'danger' : 'default'}
+        />
+        <StatCard
+          label="Push devices"
+          value={stats.push.subscriptions}
+          detail="Browsers subscribed to notifications"
+          icon={BellRing}
+        />
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {/* Catalog distribution */}
+        <div className="rounded-xl border border-admin-border bg-admin-surface p-5 lg:col-span-2">
+          <h2 className="mb-4 font-display text-base font-bold">Products per category</h2>
+          {stats.productsByCategory.length === 0 ? (
+            <p className="text-sm text-admin-text/60">No categories yet.</p>
+          ) : (
+            <ul className="space-y-2.5">
+              {stats.productsByCategory.map((row) => {
+                const max = Math.max(...stats.productsByCategory.map((c) => c.count), 1);
+                return (
+                  <li key={row.name} className="flex items-center gap-3">
+                    <span className="w-40 shrink-0 truncate text-sm">
+                      {row.icon} {row.name}
+                    </span>
+                    <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-admin-card">
+                      <span
+                        className="block h-full rounded-full bg-primary"
+                        style={{ width: `${Math.round((row.count / max) * 100)}%` }}
+                      />
+                    </span>
+                    <span className="w-8 shrink-0 text-right text-sm font-bold tabular-nums">{row.count}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* Next actions */}
+        <div className="rounded-xl border border-admin-border border-l-4 border-l-accent-gold bg-admin-surface p-5">
+          <h2 className="mb-1 font-display text-base font-bold">
+            {needsAttention ? 'Needs attention' : 'Everything looks healthy'}
+          </h2>
+          <p className="mb-4 text-sm text-admin-text/70">
+            {needsAttention
+              ? 'Some products are running out. Restock or hide them so the storefront stays accurate.'
+              : 'No stock warnings across the catalog right now.'}
+          </p>
+          <div className="space-y-2">
+            <Link
+              to="/products"
+              className="block rounded-lg bg-primary px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-white transition hover:bg-primary-hover"
+            >
+              Manage products
+            </Link>
+            <Link
+              to="/notifications"
+              className="block rounded-lg border border-admin-border px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider transition hover:bg-admin-card"
+            >
+              Send a notification
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

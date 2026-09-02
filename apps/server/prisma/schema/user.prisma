@@ -13,6 +13,7 @@ model User {
   cart          Cart?
   orders        Order[]
   notifications Notification[]
+  pushSubs      PushSubscription[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 

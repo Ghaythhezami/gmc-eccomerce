@@ -9,6 +9,7 @@ import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
 import { Categories } from './pages/Categories';
 import { Products } from './pages/Products';
+import { Notifications } from './pages/Notifications';
 import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { 
   LayoutDashboard, 
@@ -31,10 +32,7 @@ import {
 const STOREFRONT_URL = import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:5173';
 
 // Catalog pages are fully built; these two are still feature-ticket placeholders.
-const pages = [
-  { name: 'Orders', path: '/orders', icon: ShoppingBag },
-  { name: 'Notifications', path: '/notifications', icon: Bell },
-];
+const pages = [{ name: 'Orders', path: '/orders', icon: ShoppingBag }];
 
 export function AdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -139,6 +137,15 @@ export function AdminLayout() {
             </Link>
 
             <Link
+              to="/notifications"
+              onClick={() => setMobileMenuOpen(false)}
+              className={navLinkClasses('/notifications')}
+            >
+              <Bell size={18} />
+              <span>Notifications</span>
+            </Link>
+
+            <Link
               to="/products"
               onClick={() => setMobileMenuOpen(false)}
               className={navLinkClasses('/products')}
@@ -217,6 +224,7 @@ export function AdminLayout() {
             <Route path="/storefront-access" element={<StorefrontAccess />} /> {/* <-- Add this! */}
             <Route path="/categories" element={<Categories />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/notifications" element={<Notifications />} />
             {pages.map((page) => (
               <Route 
                 key={page.name} 
