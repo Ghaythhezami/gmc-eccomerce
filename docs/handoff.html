@@ -108,7 +108,7 @@
 
 <div class="box tldr">
   <div class="t">TL;DR</div>
-  <p>The storefront catalog was hardcoded in a single file and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, adds VAPID web push, a real newsletter and a configurable flash sale, introduces the first API tests, and fixes the local launch scripts.</p>
+  <p>The storefront catalog was hardcoded in a single file and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, adds VAPID web push, a real newsletter and a configurable flash sale, wires the storefront to PR&nbsp;#5&rsquo;s server cart so Add to Cart works, introduces the first API tests, and fixes the local launch scripts.</p>
   <p><strong>Before merging, read section 6.</strong> PR&nbsp;#7 re-implements category CRUD that PR&nbsp;#4 already delivers, at the same file paths. The two conflict and must be reconciled &mdash; merge&nbsp;#4 first, then rebase&nbsp;#7 onto it.</p>
 </div>
 
@@ -228,6 +228,19 @@
   <li><code>AdminLayout</code> referenced Tailwind classes absent from the admin theme (<code>bg-bg</code>, <code>bg-surface</code>, <code>border-border</code>, <code>text-text</code>, <code>text-star</code>), which compiled to nothing and left the panel unstyled. Mapped onto the <code>--color-admin-*</code> tokens that exist.</li>
 </ul>
 
+<h3>2.9 &nbsp;Shopping cart &mdash; wired, not reimplemented</h3>
+<p>Add to Cart did nothing, the badge was hardcoded to <code>0</code> and <code>/cart</code> had no route. Rather than write a third parallel implementation, <strong>the cart module, its DTOs and its unit test are ported verbatim from <code>feat/kenule-shopping-cart</code> (PR&nbsp;#5)</strong> and registered in <code>AppModule</code>, so the two branches converge instead of colliding the way #4 and this branch do over categories.</p>
+<div class="box info">
+  <div class="t">The two-carts decision is now made</div>
+  <p>Kenule&rsquo;s client-only <code>features/cart/cartSlice.ts</code> and PR&nbsp;#5&rsquo;s server cart were two competing sources of truth. This branch picks the <strong>server cart</strong> &mdash; the only one that can price an order from the database &mdash; and deletes the unused slice, which nothing imported. Order creation in FEATURE-005 should read from it.</p>
+</div>
+<ul>
+  <li><code>ProductCard</code> and <code>ProductDetail</code> call <code>addItem</code>. The card is itself a link to the product, so the button must <code>preventDefault</code> or every add would navigate away. Signed-out users get a prompt and are sent to login rather than a 401.</li>
+  <li>The detail page has a quantity field capped at the product&rsquo;s stock, so the form cannot offer more than the API will accept.</li>
+  <li><code>/cart</code> renders line items, a quantity stepper, per-line remove, empty cart, and a summary priced entirely by the server. Decrementing to zero removes the line rather than sending an invalid quantity.</li>
+  <li>The header badge reads the server cart, so it survives reloads and is consistent across devices.</li>
+</ul>
+
 <h2 class="pagebreak"><span class="num">3</span>Running it locally</h2>
 
 <p>Two helper scripts sit at the repository root. Both were broken in ways that are easy to misread as &ldquo;the project doesn't work&rdquo;, and both are fixed in PR&nbsp;#7.</p>
@@ -306,9 +319,9 @@
   </tbody>
 </table>
 
-<div class="box warn">
-  <div class="t">Neither is merged yet — and the cart is not usable on the Kenule branch alone</div>
-  <p>On <code>feat(kenule)/auth</code> there is no <code>/cart</code> route, the cart badge is hardcoded to <code>0</code>, and &ldquo;Add to Cart&rdquo; does nothing. Kenule's client-only <code>features/cart/cartSlice.ts</code> and PR&nbsp;#5's server-backed cart are two competing sources of truth &mdash; <strong>the team needs to pick one</strong>. Prefer the server cart: it is the only one that can price an order correctly.</p>
+<div class="box ok">
+  <div class="t">Both are usable on this branch</div>
+  <p>PR&nbsp;#7 ports PR&nbsp;#5&rsquo;s cart module verbatim and wires the storefront to it, so Add to Cart, the quantity stepper and the cart page all work here. The competing client-only cart slice has been deleted. PRs&nbsp;#4 and&nbsp;#5 still need merging in their own right &mdash; see section 6 for the categories overlap.</p>
 </div>
 
 <h2><span class="num">6</span>The conflict between PR #7 and PR #4 — please read</h2>
@@ -348,7 +361,7 @@
 
 <div class="box warn">
   <div class="t">Your one real decision: which cart feeds an order</div>
-  <p>An order is created from a cart, and there are currently two carts. Design against PR&nbsp;#5's <strong>server cart</strong> &mdash; it computes subtotals from database prices, which is what an order needs. If #5 has not merged when you start, branch from <code>feat/kenule-shopping-cart</code> rather than from the Kenule branch, or build the Orders module against the Prisma models directly and wire the cart link once #5 lands.</p>
+  <p>This is now decided: the <strong>server cart</strong> won and the client-only slice is gone. <code>CartService.getCart(userId)</code> returns items with <code>unitPrice</code>, <code>lineTotal</code> and a server-computed <code>subtotal</code> &mdash; exactly the shape order creation needs. Branch from this PR (or from <code>feat/kenule-shopping-cart</code> if #7 has not merged) and you inherit a working cart to build checkout on.</p>
 </div>
 
 <h3>Snapshot the price at purchase time</h3>
@@ -365,6 +378,8 @@
     <tr><td class="files">e4721de</td><td>feat(notifications): VAPID web push, real dashboard stats, and gap fixes</td></tr>
     <tr><td class="files">4fa1b76</td><td>feat(ux): toast notifications, API tests, and FEATURE-001/002 gap fixes</td></tr>
     <tr><td class="files">34083cf</td><td>feat(storefront): newsletter, configurable flash sale, help pages, real profile</td></tr>
+    <tr><td class="files">b8dc61d</td><td>docs: refresh handoff PDF for push, toasts, tests and storefront gaps</td></tr>
+    <tr><td class="files">139f85d</td><td>feat(cart): wire the storefront to the server cart from PR #5</td></tr>
   </tbody>
 </table>
 
@@ -374,6 +389,7 @@
   <li><strong>27 unit tests pass</strong> over <code>ProductsService</code> and <code>CategoriesService</code>. The server had no jest configuration at all and jest itself was not installed; both were added, which is what FEATURE-002&rsquo;s &ldquo;API tests exist&rdquo; criterion needs.</li>
   <li>Push pipeline exercised end to end: a broadcast stored a notification for every user, attempted delivery, and pruned the dead subscription &mdash; while still returning success, confirming push failures do not break the request.</li>
   <li>Newsletter, flash-sale configuration and their guards checked over HTTP.</li>
+  <li>Cart exercised end to end over HTTP and through the UI: add, increment on repeat add, quantity stepper, per-line remove, decrement-to-removal, clear, and <strong>per-user isolation</strong> (a second account sees an empty cart). Stock is enforced &mdash; asking for one more than the 25 in stock returns <code>Only 25 in stock</code>, while exactly 25 is accepted &mdash; and an unknown product id returns 404.</li>
   <li>Guards: 401 unauthenticated, 403 with a CUSTOMER token on an admin write.</li>
   <li>Validation: 400 for <code>compareAtPrice &le; price</code>; 400 deleting a category that still holds products.</li>
   <li>Full round trip through the admin UI &mdash; created a product, confirmed slug generation and the derived discount, saw it appear on the storefront category page and its detail page, then deleted it and confirmed a 404.</li>
