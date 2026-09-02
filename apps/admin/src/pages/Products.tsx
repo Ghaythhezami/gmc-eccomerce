@@ -10,6 +10,7 @@ import {
 } from '../features/catalog/catalogApi';
 import type { Product } from '../features/catalog/types';
 import { Banner, Button, Field, Input, Modal, Select, Textarea, Toggle, errorMessage } from '../components/ui';
+import { useToast } from '../components/Toast';
 
 interface FormState {
   name: string;
@@ -67,11 +68,11 @@ export function Products() {
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
+  const toast = useToast();
   const [editing, setEditing] = useState<Product | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((prev) => ({ ...prev, [key]: value }));
@@ -118,10 +119,10 @@ export function Products() {
     try {
       if (editing) {
         await updateProduct({ id: editing.id, body }).unwrap();
-        setNotice(`Product "${body.name}" updated.`);
+        toast.success(`Product "${body.name}" updated.`);
       } else {
         await createProduct(body).unwrap();
-        setNotice(`Product "${body.name}" created.`);
+        toast.success(`Product "${body.name}" created.`);
       }
       setIsOpen(false);
     } catch (err) {
@@ -134,10 +135,9 @@ export function Products() {
     setError('');
     try {
       await deleteProduct(product.id).unwrap();
-      setNotice(`Product "${product.name}" deleted.`);
+      toast.success(`Product "${product.name}" deleted.`);
     } catch (err) {
-      setNotice('');
-      setError(errorMessage(err, 'Could not delete the product.'));
+      toast.error(errorMessage(err, 'Could not delete the product.'));
     }
   };
 
@@ -175,8 +175,6 @@ export function Products() {
         </div>
       </div>
 
-      {notice && <Banner tone="success">{notice}</Banner>}
-      {error && !isOpen && <Banner tone="error">{error}</Banner>}
       {noCategories && !isLoading && (
         <Banner tone="error">Create a category first — every product must belong to one.</Banner>
       )}

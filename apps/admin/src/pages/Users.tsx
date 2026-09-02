@@ -4,23 +4,21 @@ import { ShieldCheck, Trash2, UserCircle } from 'lucide-react';
 import { useDeleteUserMutation, useGetUsersQuery } from '../features/auth/authApi';
 import { useAppSelector } from '../store/hooks';
 import { Banner, errorMessage } from '../components/ui';
+import { useToast } from '../components/Toast';
 
 export function Users() {
   const { data: users = [], isLoading, error } = useGetUsersQuery();
   const [deleteUser] = useDeleteUserMutation();
   const me = useAppSelector((s) => s.auth.user);
-  const [notice, setNotice] = useState('');
-  const [failure, setFailure] = useState('');
+  const toast = useToast();
 
   const remove = async (id: string, email: string) => {
     if (!window.confirm(`Delete ${email}? This cannot be undone.`)) return;
-    setFailure('');
     try {
       await deleteUser(id).unwrap();
-      setNotice(`${email} deleted.`);
+      toast.success(`${email} deleted.`);
     } catch (err) {
-      setNotice('');
-      setFailure(errorMessage(err, 'Could not delete this user.'));
+      toast.error(errorMessage(err, 'Could not delete this user.'));
     }
   };
 
@@ -34,8 +32,6 @@ export function Users() {
         </p>
       </div>
 
-      {notice && <Banner tone="success">{notice}</Banner>}
-      {failure && <Banner tone="error">{failure}</Banner>}
 
       {isLoading ? (
         <p className="text-sm text-admin-text/60">Loading users…</p>

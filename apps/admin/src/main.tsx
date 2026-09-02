@@ -18,12 +18,15 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import './styles.css';
 import { App } from './App';
+import { ToastProvider } from './components/Toast';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>

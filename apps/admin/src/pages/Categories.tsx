@@ -9,6 +9,7 @@ import {
 } from '../features/catalog/catalogApi';
 import type { Category } from '../features/catalog/types';
 import { Banner, Button, Field, Input, Modal, Textarea, Toggle, errorMessage } from '../components/ui';
+import { useToast } from '../components/Toast';
 
 interface FormState {
   name: string;
@@ -48,11 +49,11 @@ export function Categories() {
   const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
 
+  const toast = useToast();
   const [editing, setEditing] = useState<Category | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -88,10 +89,10 @@ export function Categories() {
     try {
       if (editing) {
         await updateCategory({ id: editing.id, body }).unwrap();
-        setNotice(`Category "${body.name}" updated.`);
+        toast.success(`Category "${body.name}" updated.`);
       } else {
         await createCategory(body).unwrap();
-        setNotice(`Category "${body.name}" created.`);
+        toast.success(`Category "${body.name}" created.`);
       }
       setIsOpen(false);
     } catch (err) {
@@ -104,10 +105,9 @@ export function Categories() {
     setError('');
     try {
       await deleteCategory(category.id).unwrap();
-      setNotice(`Category "${category.name}" deleted.`);
+      toast.success(`Category "${category.name}" deleted.`);
     } catch (err) {
-      setNotice('');
-      setError(errorMessage(err, 'Could not delete the category.'));
+      toast.error(errorMessage(err, 'Could not delete the category.'));
     }
   };
 
@@ -126,8 +126,6 @@ export function Categories() {
         </Button>
       </div>
 
-      {notice && <Banner tone="success">{notice}</Banner>}
-      {error && !isOpen && <Banner tone="error">{error}</Banner>}
 
       {isLoading ? (
         <p className="text-sm text-admin-text/60">Loading categories…</p>

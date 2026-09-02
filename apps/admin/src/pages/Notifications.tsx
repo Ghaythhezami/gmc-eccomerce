@@ -7,16 +7,17 @@ import {
 } from '../features/notifications/notificationsApi';
 import { useGetStatsQuery } from '../features/auth/authApi';
 import { Banner, Button, Field, Input, Textarea, errorMessage } from '../components/ui';
+import { useToast } from '../components/Toast';
 
 export function Notifications() {
   const { data: recent = [], isLoading } = useGetRecentNotificationsQuery();
   const { data: stats } = useGetStatsQuery();
   const [broadcast, { isLoading: isSending }] = useBroadcastMutation();
 
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [url, setUrl] = useState('/products');
-  const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
   const devices = stats?.push.subscriptions ?? 0;
@@ -24,14 +25,13 @@ export function Notifications() {
   const send = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-    setNotice('');
     try {
       const result = await broadcast({
         title: title.trim(),
         message: message.trim(),
         url: url.trim() || undefined,
       }).unwrap();
-      setNotice(
+      toast.success(
         `Stored for ${result.recipients} user(s). Pushed to ${result.sent} device(s)` +
           (result.failed ? `, ${result.failed} failed` : '') +
           (result.pruned ? `, ${result.pruned} stale subscription(s) removed` : '') +
@@ -55,7 +55,7 @@ export function Notifications() {
         </p>
       </div>
 
-      {notice && <Banner tone="success">{notice}</Banner>}
+
       {error && <Banner tone="error">{error}</Banner>}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">

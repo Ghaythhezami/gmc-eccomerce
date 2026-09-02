@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -40,8 +41,10 @@
     "@nestjs/testing": "^11.0.1",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/web-push": "^3.6.4",
+    "jest": "^30.5.1",
     "prisma": "^6.2.1",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

@@ -8,7 +8,9 @@ import { Footer } from './layout/Footer';
 import { Header } from './layout/Header';
 import { TopBar } from './layout/TopBar';
 // 1. Import the API to fetch allowed roles
-import { useGetStorefrontAccessQuery } from '../features/storefront/storefrontApi';
+import { storefrontApi, useGetStorefrontAccessQuery } from '../features/storefront/storefrontApi';
+import { catalogApi } from '../features/catalog/catalogApi';
+import { notificationsApi } from '../features/notifications/notificationsApi';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -26,7 +28,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const signOut = () => {
     dispatch(logout());
+    // Every cache holding user-scoped data has to be cleared, not just authApi -
+    // otherwise the next account briefly sees the previous user's notifications.
     dispatch(authApi.util.resetApiState());
+    dispatch(notificationsApi.util.resetApiState());
+    dispatch(catalogApi.util.resetApiState());
+    dispatch(storefrontApi.util.resetApiState());
     navigate('/login');
   };
 

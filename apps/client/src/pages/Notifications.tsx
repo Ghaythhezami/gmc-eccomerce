@@ -8,6 +8,7 @@ import {
   useMarkReadMutation,
 } from '../features/notifications/notificationsApi';
 import { currentState, subscribe, unsubscribe, type PushState } from '../features/notifications/push';
+import { useToast } from '../components/Toast';
 
 function timeAgo(iso: string): string {
   const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -25,6 +26,7 @@ export function Notifications() {
   const [markRead] = useMarkReadMutation();
   const [markAllRead, { isLoading: isMarkingAll }] = useMarkAllReadMutation();
 
+  const toast = useToast();
   const [pushState, setPushState] = useState<PushState>('unsubscribed');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -43,9 +45,13 @@ export function Notifications() {
       } else {
         await subscribe(token);
       }
-      setPushState(await currentState());
+      const next = await currentState();
+      setPushState(next);
+      toast.success(next === 'subscribed' ? 'Notifications enabled on this device.' : 'Notifications turned off.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not change your notification setting.');
+      const detail = err instanceof Error ? err.message : 'Could not change your notification setting.';
+      setError(detail);
+      toast.error(detail);
     } finally {
       setBusy(false);
     }
@@ -121,7 +127,10 @@ export function Notifications() {
         <div className="mb-3 flex justify-end">
           <button
             type="button"
-            onClick={() => markAllRead()}
+            onClick={async () => {
+              const { updated } = await markAllRead().unwrap();
+              toast.success(updated === 1 ? '1 notification marked as read.' : `${updated} notifications marked as read.`);
+            }}
             disabled={isMarkingAll}
             className="text-sm font-semibold text-[#a34f32] hover:underline disabled:opacity-60"
           >

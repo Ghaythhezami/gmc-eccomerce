@@ -1,6 +1,7 @@
 // apps/client/src/pages/Products.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { AlertTriangle } from 'lucide-react';
 import { useGetCategoriesQuery, useGetProductsQuery, type ProductQuery } from '../features/catalog/catalogApi';
 import { ProductCard, ProductCardSkeleton } from '../components/home/ProductCard';
 
@@ -29,7 +30,7 @@ export function Products() {
   const { data: categories = [] } = useGetCategoriesQuery();
   const activeCategory = categories.find((category) => category.slug === slug);
 
-  const { data, isLoading, isFetching } = useGetProductsQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useGetProductsQuery({
     ...(slug ? { category: slug } : {}),
     ...(search ? { search } : {}),
     sort,
@@ -112,6 +113,24 @@ export function Products() {
           {Array.from({ length: 8 }, (_, index) => (
             <ProductCardSkeleton key={index} />
           ))}
+        </div>
+      ) : isError ? (
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 p-12 text-center"
+        >
+          <AlertTriangle size={28} className="mx-auto mb-3 text-red-500" />
+          <h2 className="text-lg font-bold text-red-900">The catalog could not be loaded</h2>
+          <p className="mt-1 text-sm text-red-800">
+            The storefront could not reach the API. Check your connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-5 rounded-md bg-[#a34f32] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#8b3f25]"
+          >
+            Retry
+          </button>
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[#c8c4b9] bg-white p-12 text-center">
