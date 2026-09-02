@@ -5,6 +5,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
+import { StorefrontModule } from './storefront/storefront.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProductsModule } from './products/products.module';
     AuthModule,
     CategoriesModule,
     ProductsModule,
+    StorefrontModule,
     NotificationsModule,
   ],
 })

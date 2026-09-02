@@ -10,6 +10,7 @@ import { Users } from './pages/Users';
 import { Categories } from './pages/Categories';
 import { Products } from './pages/Products';
 import { Notifications } from './pages/Notifications';
+import { Marketing } from './pages/Marketing';
 import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { 
   LayoutDashboard, 
@@ -26,6 +27,7 @@ import {
   UserCircle,
   Settings2,
   Store,
+  Megaphone,
 } from 'lucide-react';
 
 // The storefront is a separate Vite app, so this is a real navigation, not a route.
@@ -137,6 +139,15 @@ export function AdminLayout() {
             </Link>
 
             <Link
+              to="/marketing"
+              onClick={() => setMobileMenuOpen(false)}
+              className={navLinkClasses('/marketing')}
+            >
+              <Megaphone size={18} />
+              <span>Marketing</span>
+            </Link>
+
+            <Link
               to="/notifications"
               onClick={() => setMobileMenuOpen(false)}
               className={navLinkClasses('/notifications')}
@@ -225,6 +236,7 @@ export function AdminLayout() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/products" element={<Products />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/marketing" element={<Marketing />} />
             {pages.map((page) => (
               <Route 
                 key={page.name} 

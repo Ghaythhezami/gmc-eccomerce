@@ -7,6 +7,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
 import { Notifications } from './pages/Notifications';
 import { NotFound } from './pages/NotFound';
+import { Help } from './pages/Help';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -36,6 +37,9 @@ export function App() {
         <Route path="/category/:slug" element={<Products />} />
         <Route path="/login" element={<AuthPage register={false} />} />
         <Route path="/register" element={<AuthPage register />} />
+        <Route path="/help" element={<Help section="help" />} />
+        <Route path="/support" element={<Help section="support" />} />
+        <Route path="/sell" element={<Help section="sell" />} />
 
         {/* Protected Routes - DYNAMIC ROLE CHECK */}
         {/* Uses allowedRoles from the backend instead of hardcoded ['CUSTOMER'] */}
