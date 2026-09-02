@@ -3,6 +3,7 @@ import { ShoppingCart, User, HelpCircle, Search, LogOut, Menu, X, Bell } from 'l
 import { useState } from 'react';
 import { GoMyCodeGamesLogo } from '../GoMyCodeGamesLogo';
 import { useGetUnreadCountQuery } from '../../features/notifications/notificationsApi';
+import { useGetCartQuery } from '../../features/cart/cartApi';
 
 interface HeaderProps {
   user: any;
@@ -16,6 +17,9 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
   const navigate = useNavigate();
   // Only signed-in users have notifications, so skip the request otherwise.
   const { data: unread } = useGetUnreadCountQuery(undefined, { skip: !user });
+  // The badge reflects the server cart, so it survives reloads and other devices.
+  const { data: cart } = useGetCartQuery(undefined, { skip: !user });
+  const liveCartCount = cart?.itemCount ?? cartCount;
 
   const runSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -104,9 +108,9 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
             <Link to="/cart" className="flex flex-col items-center text-xs font-medium text-[#20231f] hover:text-[#a34f32] transition-colors px-1 sm:px-2 relative">
               <ShoppingCart size={20} className="sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
               <span className="hidden sm:inline">Cart</span>
-              {cartCount > 0 && (
+              {liveCartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#c0392b] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-                  {cartCount > 99 ? '99+' : cartCount}
+                  {liveCartCount > 99 ? '99+' : liveCartCount}
                 </span>
               )}
             </Link>

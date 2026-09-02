@@ -1,10 +1,36 @@
 // apps/client/src/pages/ProductDetail.tsx
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useAddItemMutation } from '../features/cart/cartApi';
+import { useAppSelector } from '../store/hooks';
+import { useToast } from '../components/Toast';
 import { useGetProductQuery } from '../features/catalog/catalogApi';
 
 export function ProductDetail() {
   const { slug = '' } = useParams<{ slug: string }>();
   const { data: product, isLoading, isError } = useGetProductQuery(slug);
+  const user = useAppSelector((s) => s.auth.user);
+  const [addItem, { isLoading: isAdding }] = useAddItemMutation();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [quantity, setQuantity] = useState(1);
+
+  const addToCart = async () => {
+    if (!product) return;
+    if (!user) {
+      toast.info('Sign in to start a cart.');
+      navigate('/login');
+      return;
+    }
+    try {
+      await addItem({ productId: product.id, quantity }).unwrap();
+      toast.success(`${quantity} × ${product.name} added to your cart.`);
+    } catch (error) {
+      const message = (error as { data?: { message?: string | string[] } })?.data?.message;
+      toast.error(Array.isArray(message) ? message.join(', ') : (message ?? 'Could not add this to your cart.'));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -94,13 +120,34 @@ export function ProductDetail() {
             )}
           </p>
 
-          <button
-            type="button"
-            disabled={soldOut}
-            className="mt-6 w-full rounded-md bg-[#a34f32] py-3 text-sm font-bold text-white transition hover:bg-[#8b3f25] disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto sm:px-10"
-          >
-            {soldOut ? 'Out of stock' : 'Add to Cart'}
-          </button>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {!soldOut && (
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600">Qty</span>
+                <input
+                  type="number"
+                  min={1}
+                  // Never let the form offer more than the stock the API will accept.
+                  max={product.stock}
+                  value={quantity}
+                  onChange={(event) =>
+                    setQuantity(Math.min(product.stock, Math.max(1, Number(event.target.value) || 1)))
+                  }
+                  className="w-20 rounded-md border border-[#c8c4b9] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#a34f32]"
+                />
+              </label>
+            )}
+
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={soldOut || isAdding}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#a34f32] py-3 text-sm font-bold text-white transition hover:bg-[#8b3f25] disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto sm:px-10"
+            >
+              {isAdding && <Loader2 size={15} className="animate-spin" />}
+              {soldOut ? 'Out of stock' : isAdding ? 'Adding…' : 'Add to Cart'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

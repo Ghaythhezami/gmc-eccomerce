@@ -1,5 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import type { Product } from '../../features/catalog/catalogApi';
+import { useAddItemMutation } from '../../features/cart/cartApi';
+import { useAppSelector } from '../../store/hooks';
+import { useToast } from '../Toast';
 
 /** Renders the 0–5 rating as filled/empty stars rather than a fixed five-star string. */
 function Stars({ rating }: { rating: number }) {
@@ -13,8 +17,33 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export function ProductCard({ product }: { product: Product }) {
-  const { name, slug, price, compareAtPrice, discountPercent, rating, reviewCount, imageUrl, stock } = product;
+  const { id, name, slug, price, compareAtPrice, discountPercent, rating, reviewCount, imageUrl, stock } = product;
   const soldOut = stock === 0;
+
+  const user = useAppSelector((s) => s.auth.user);
+  const [addItem, { isLoading }] = useAddItemMutation();
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  const addToCart = async (event: React.MouseEvent) => {
+    // The whole card is a link to the product, so the button must not navigate.
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!user) {
+      toast.info('Sign in to start a cart.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await addItem({ productId: id, quantity: 1 }).unwrap();
+      toast.success(`${name} added to your cart.`);
+    } catch (error) {
+      const message = (error as { data?: { message?: string | string[] } })?.data?.message;
+      toast.error(Array.isArray(message) ? message.join(', ') : (message ?? 'Could not add this to your cart.'));
+    }
+  };
 
   return (
     <Link
@@ -58,10 +87,12 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
         <button
           type="button"
-          disabled={soldOut}
-          className="w-full rounded-md bg-[#a34f32] py-2 text-sm font-bold text-white transition hover:bg-[#8b3f25] disabled:cursor-not-allowed disabled:bg-gray-300"
+          onClick={addToCart}
+          disabled={soldOut || isLoading}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#a34f32] py-2 text-sm font-bold text-white transition hover:bg-[#8b3f25] disabled:cursor-not-allowed disabled:bg-gray-300"
         >
-          {soldOut ? 'Out of stock' : 'Add to Cart'}
+          {isLoading && <Loader2 size={14} className="animate-spin" />}
+          {soldOut ? 'Out of stock' : isLoading ? 'Adding…' : 'Add to Cart'}
         </button>
       </div>
     </Link>

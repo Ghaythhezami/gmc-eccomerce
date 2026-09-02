@@ -6,6 +6,7 @@ import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
 import { Notifications } from './pages/Notifications';
+import { Cart } from './pages/Cart';
 import { NotFound } from './pages/NotFound';
 import { Help } from './pages/Help';
 import { AuthPage } from './pages/AuthPage';
@@ -43,6 +44,7 @@ export function App() {
 
         {/* Protected Routes - DYNAMIC ROLE CHECK */}
         {/* Uses allowedRoles from the backend instead of hardcoded ['CUSTOMER'] */}
+        <Route path="/cart" element={<ProtectedRoute roles={allowedRoles}><Cart /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Checkout" /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Orders" /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute roles={allowedRoles}><Profile /></ProtectedRoute>} />
