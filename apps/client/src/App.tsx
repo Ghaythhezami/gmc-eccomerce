@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Shell } from './components/Shell';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
+import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
@@ -28,7 +29,9 @@ export function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/products/:id" element={<Placeholder name="Product details" />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
+        {/* Same catalog view, pinned to one category by slug. */}
+        <Route path="/category/:slug" element={<Products />} />
         <Route path="/login" element={<AuthPage register={false} />} />
         <Route path="/register" element={<AuthPage register />} />
 

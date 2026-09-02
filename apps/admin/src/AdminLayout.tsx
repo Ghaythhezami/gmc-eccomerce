@@ -7,6 +7,8 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
+import { Categories } from './pages/Categories';
+import { Products } from './pages/Products';
 import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { 
   LayoutDashboard, 
@@ -24,9 +26,8 @@ import {
   Settings2,
 } from 'lucide-react';
 
+// Catalog pages are fully built; these two are still feature-ticket placeholders.
 const pages = [
-  { name: 'Products', path: '/products', icon: Package },
-  { name: 'Categories', path: '/categories', icon: FolderTree },
   { name: 'Orders', path: '/orders', icon: ShoppingBag },
   { name: 'Notifications', path: '/notifications', icon: Bell },
 ];
@@ -115,13 +116,31 @@ export function AdminLayout() {
               <span>Users Management</span>
             </Link>
 
-            <Link 
-              to="/storefront-access" 
+            <Link
+              to="/storefront-access"
               onClick={() => setMobileMenuOpen(false)}
               className={navLinkClasses('/storefront-access')}
             >
               <Settings2 size={18} />
               <span>Storefront Access</span>
+            </Link>
+
+            <Link
+              to="/categories"
+              onClick={() => setMobileMenuOpen(false)}
+              className={navLinkClasses('/categories')}
+            >
+              <FolderTree size={18} />
+              <span>Categories</span>
+            </Link>
+
+            <Link
+              to="/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className={navLinkClasses('/products')}
+            >
+              <Package size={18} />
+              <span>Products</span>
             </Link>
 
             {pages.map((page) => {
@@ -184,6 +203,8 @@ export function AdminLayout() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
             <Route path="/storefront-access" element={<StorefrontAccess />} /> {/* <-- Add this! */}
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/products" element={<Products />} />
             {pages.map((page) => (
               <Route 
                 key={page.name} 

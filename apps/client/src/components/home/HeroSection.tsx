@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { categories } from './data';
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useGetCategoriesQuery } from '../../features/catalog/catalogApi';
 
 const HERO_SLIDES = [
   {
@@ -20,7 +20,7 @@ const HERO_SLIDES = [
     title: 'Game Dev Masterclass',
     description: 'Learn Unreal Engine 5 & Unity from industry veterans.',
     ctaText: 'Explore Pass',
-    ctaLink: '/category/masterclass',
+    ctaLink: '/category/game-dev-courses',
     bgImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1400&q=80',
     accentColor: 'text-sky-300',
   },
@@ -30,7 +30,7 @@ const HERO_SLIDES = [
     title: 'Pre-Order Major Titles',
     description: 'Lock in exclusive skin packs, early access, and bonus content.',
     ctaText: 'View Titles',
-    ctaLink: '/products?filter=preorder',
+    ctaLink: '/products?sort=newest',
     bgImage: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=80',
     accentColor: 'text-[var(--color-danger)]',
   },
@@ -39,6 +39,7 @@ const HERO_SLIDES = [
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const { data: categories = [] } = useGetCategoriesQuery();
 
   useEffect(() => {
     if (isPaused) return;
@@ -59,13 +60,15 @@ export function HeroSection() {
       <div className="lg:hidden -mx-4 px-4 overflow-x-auto scrollbar-none flex items-center gap-2 py-1">
         {categories.map((cat) => (
           <Link
-            key={cat.name}
-            to={`/category/${cat.name.toLowerCase().replace(' ', '-')}`}
+            key={cat.id}
+            to={`/category/${cat.slug}`}
             className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] shadow-sm transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
           >
             <span>{cat.icon}</span>
             <span>{cat.name}</span>
-            <span className="rounded-full bg-[var(--color-bg)] px-1.5 py-0.5 text-[10px] text-gray-600">{cat.count}</span>
+            <span className="rounded-full bg-[var(--color-bg)] px-1.5 py-0.5 text-[10px] text-gray-600">
+              {cat.productCount}
+            </span>
           </Link>
         ))}
       </div>
@@ -79,16 +82,16 @@ export function HeroSection() {
           </h3>
           <ul className="space-y-1">
             {categories.map((cat) => (
-              <li key={cat.name}>
+              <li key={cat.id}>
                 <Link
-                  to={`/category/${cat.name.toLowerCase().replace(' ', '-')}`}
+                  to={`/category/${cat.slug}`}
                   className="flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-bg)] hover:text-[var(--color-primary)]"
                 >
                   <span className="flex items-center gap-2">
                     <span className="text-base">{cat.icon}</span>
                     {cat.name}
                   </span>
-                  <span className="text-xs font-normal text-gray-500">{cat.count}</span>
+                  <span className="text-xs font-normal text-gray-500">{cat.productCount}</span>
                 </Link>
               </li>
             ))}
@@ -139,8 +142,8 @@ export function HeroSection() {
                 </p>
 
                 {/* CTA */}
-                <Link 
-                  to="/products" 
+                <Link
+                  to={slide.ctaLink}
                   className="group relative z-10 inline-flex items-center gap-2.5 rounded-xl bg-[#20231f] px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-black/25 transition-all duration-300 hover:bg-black hover:shadow-xl hover:shadow-black/40 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-amber-300/40"
                 >
                   <span>{slide.ctaText}</span>
@@ -194,7 +197,7 @@ export function HeroSection() {
               <p className="mb-4 text-xs sm:text-sm opacity-90">Learn from industry experts with hands-on courses.</p>
             </div>
             <Link 
-              to="/category/masterclass" 
+              to="/category/game-dev-courses" 
               className="self-start rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 text-xs font-bold text-white transition active:scale-95"
             >
               Explore Courses
@@ -208,7 +211,7 @@ export function HeroSection() {
               <p className="mb-4 text-xs sm:text-sm opacity-90">Get exclusive in-game bonuses and early access.</p>
             </div>
             <Link 
-              to="/products?filter=preorder" 
+              to="/products?sort=newest" 
               className="self-start rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 text-xs font-bold text-white transition active:scale-95"
             >
               View Titles
