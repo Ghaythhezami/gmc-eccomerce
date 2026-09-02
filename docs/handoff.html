@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GMC E-Commerce — Contribution Handoff</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm 14mm 14mm; }
+  @page :first { margin-top: 0; }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 9.6pt; line-height: 1.5; color: #1d1f21; margin: 0;
+  }
+
+  h1, h2, h3 { font-family: "Segoe UI Semibold", "Segoe UI", Arial, sans-serif; color: #20231f; }
+  h2 {
+    font-size: 14pt; margin: 22px 0 8px; padding-bottom: 5px;
+    border-bottom: 2px solid #a34f32; break-after: avoid; page-break-after: avoid;
+  }
+  h2 .num {
+    display: inline-block; min-width: 24px; height: 24px; line-height: 24px;
+    background: #a34f32; color: #fff; text-align: center; border-radius: 5px;
+    font-size: 10pt; margin-right: 9px;
+  }
+  h3 { font-size: 10.6pt; margin: 15px 0 5px; color: #a34f32; break-after: avoid; page-break-after: avoid; }
+  p { margin: 0 0 8px; }
+  ul { margin: 0 0 9px; padding-left: 17px; }
+  li { margin-bottom: 3.5px; }
+  code {
+    font-family: "Cascadia Mono", Consolas, monospace; font-size: 8.6pt;
+    background: #f1efe9; padding: 1px 4px; border-radius: 3px; color: #7a3a22;
+  }
+  a { color: #a34f32; text-decoration: none; }
+
+  /* ---------- cover ---------- */
+  .cover {
+    background: #20231f; color: #fff; padding: 26mm 14mm 13mm;
+    margin: 0 -14mm 16px; break-after: avoid;
+  }
+  .cover .kicker {
+    font-size: 8.2pt; letter-spacing: .22em; text-transform: uppercase;
+    color: #e3b85b; font-weight: 700; margin-bottom: 12px;
+  }
+  .cover h1 { font-size: 27pt; line-height: 1.12; margin: 0 0 10px; color: #fff; }
+  .cover .sub { font-size: 11pt; color: #cfcdc6; margin: 0 0 20px; max-width: 155mm; }
+  .meta { display: table; width: 100%; border-top: 1px solid rgba(255,255,255,.16); padding-top: 12px; }
+  .meta div { display: table-row; }
+  .meta span { display: table-cell; padding: 2.5px 14px 2.5px 0; font-size: 8.8pt; }
+  .meta .k { color: #8f8d87; text-transform: uppercase; letter-spacing: .09em; width: 30mm; font-size: 7.8pt; }
+  .meta .v { color: #f0eee9; }
+
+  /* ---------- callouts ---------- */
+  .box { padding: 10px 13px; border-radius: 5px; margin: 11px 0; break-inside: avoid; page-break-inside: avoid; }
+  .box p:last-child { margin-bottom: 0; }
+  .box .t { font-weight: 700; margin-bottom: 4px; font-size: 9.4pt; }
+  .warn { background: #fdf3f2; border-left: 4px solid #c0392b; }
+  .warn .t { color: #a5271b; }
+  .info { background: #f3f6fb; border-left: 4px solid #3d6ea8; }
+  .info .t { color: #2f5583; }
+  .ok   { background: #f1f8f3; border-left: 4px solid #2f8a4e; }
+  .ok .t { color: #24693c; }
+  .tldr { background: #faf7ef; border: 1px solid #e0d7bf; border-left: 4px solid #e3b85b; }
+  .tldr .t { color: #8a6a1f; }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 9px 0 13px; font-size: 8.7pt; break-inside: avoid; page-break-inside: avoid; }
+  th {
+    background: #20231f; color: #fff; text-align: left; padding: 6px 8px;
+    font-size: 7.7pt; text-transform: uppercase; letter-spacing: .07em; font-weight: 600;
+  }
+  td { padding: 5.5px 8px; border-bottom: 1px solid #e2e0da; vertical-align: top; }
+  tbody tr:nth-child(even) { background: #faf9f6; }
+  td.c, th.c { text-align: center; }
+  .yes { color: #24693c; font-weight: 700; }
+  .no  { color: #b0aea8; }
+
+  .pill {
+    display: inline-block; padding: 1px 7px; border-radius: 9px;
+    font-size: 7.4pt; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .p-open { background: #dff0e4; color: #1f6b3c; }
+  .p-closed { background: #eceae5; color: #6d6a63; }
+  .p-mine { background: #f6e6de; color: #93412a; }
+
+  .files { font-family: "Cascadia Mono", Consolas, monospace; font-size: 8.3pt; }
+  .files td { padding: 4px 8px; }
+  .pagebreak { break-before: page; page-break-before: always; }
+  .tight { margin-top: -3px; }
+  .foot { margin-top: 20px; padding-top: 9px; border-top: 1px solid #ddd; font-size: 7.8pt; color: #86847e; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Engineering Handoff &middot; GMC E-Commerce Platform</div>
+  <h1>Admin-Managed Catalog</h1>
+  <p class="sub">What changed on the Kenule branch, how to merge it alongside PR&nbsp;#4 and PR&nbsp;#5, and what FEATURE-005 can now build on.</p>
+  <div class="meta">
+    <div><span class="k">Author</span><span class="v">Mohamed Reda Dahdah (mrdahdah)</span></div>
+    <div><span class="k">For</span><span class="v">Kenule (branch owner) &middot; Ghayth (maintainer) &middot; Raead (FEATURE-005) &middot; the team</span></div>
+    <div><span class="k">Date</span><span class="v">2 September 2026</span></div>
+    <div><span class="k">Repository</span><span class="v">Ghaythhezami/gmc-eccomerce &mdash; base branch feat(kenule)/auth</span></div>
+    <div><span class="k">This work</span><span class="v">PR #7 &middot; branch feat/kenule-admin-catalog &middot; 3 commits &middot; 55 files &middot; +2710 / &minus;305</span></div>
+  </div>
+</div>
+
+<div class="box tldr">
+  <div class="t">TL;DR</div>
+  <p>The storefront catalog was hardcoded in a single file, and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, and fixes the local launch scripts.</p>
+  <p><strong>Before merging, read section 6.</strong> PR&nbsp;#7 re-implements category CRUD that PR&nbsp;#4 already delivers, at the same file paths. The two conflict and must be reconciled &mdash; merge&nbsp;#4 first, then rebase&nbsp;#7 onto it.</p>
+</div>
+
+<h2><span class="num">1</span>Every pull request at a glance</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:9%">PR</th><th style="width:31%">Branch</th><th style="width:12%">Status</th><th>What it delivers</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>#7</strong></td><td class="files">feat/kenule-admin-catalog</td><td><span class="pill p-mine">Open &middot; new</span></td><td>Admin-managed catalog: products module, category management UI, dynamic storefront, multi-file Prisma, script fixes.</td></tr>
+    <tr><td><strong>#6</strong></td><td class="files">fix/production-build-ts59</td><td><span class="pill p-open">Open</span></td><td>Production build fix for TypeScript&nbsp;5.9 (<code>ignoreDeprecations</code>). Effectively a prerequisite for everything else.</td></tr>
+    <tr><td><strong>#5</strong></td><td class="files">feat/kenule-shopping-cart</td><td><span class="pill p-open">Open</span></td><td>FEATURE-004 Shopping Cart &mdash; persistent, server-priced, stock-validated.</td></tr>
+    <tr><td><strong>#4</strong></td><td class="files">feat/kenule-category-management</td><td><span class="pill p-open">Open</span></td><td>FEATURE-003 Category Management &mdash; admin CRUD API plus public browse, with a unit test.</td></tr>
+    <tr><td><strong>#3</strong></td><td class="files">feat/kenule-review</td><td><span class="pill p-open">Open</span></td><td>Review notes on the auth foundation: Next.js rewrite, RBAC, Cloudinary, guest checkout, multi-file Prisma.</td></tr>
+    <tr><td>#2</td><td class="files">feature/shopping-cart</td><td><span class="pill p-closed">Closed</span></td><td>Superseded by #5 (retargeted from <code>main</code> onto the Kenule branch).</td></tr>
+    <tr><td>#1</td><td class="files">feature/category-management</td><td><span class="pill p-closed">Closed</span></td><td>Superseded by #4 (retargeted from <code>main</code> onto the Kenule branch).</td></tr>
+  </tbody>
+</table>
+
+<div class="box info">
+  <div class="t">Suggested merge order</div>
+  <p><strong>#6</strong> (unblocks the build) &rarr; <strong>#4</strong> (categories) &rarr; <strong>#5</strong> (cart) &rarr; rebase and merge <strong>#7</strong> last, since it touches the most files and overlaps&nbsp;#4.</p>
+</div>
+
+<h2><span class="num">2</span>What PR #7 changes</h2>
+
+<h3>2.1 &nbsp;Prisma — one file per module</h3>
+<p>The single <code>apps/server/prisma/schema.prisma</code> is replaced by a schema folder, so each domain owns its own file and two students editing different models no longer collide in the same file.</p>
+<table class="files">
+  <thead><tr><th style="width:44%">Path</th><th>Contains</th></tr></thead>
+  <tbody>
+    <tr><td>prisma/schema/schema.prisma</td><td>generator + datasource only</td></tr>
+    <tr><td>prisma/schema/user.prisma</td><td>User, Role</td></tr>
+    <tr><td>prisma/schema/category.prisma</td><td>Category</td></tr>
+    <tr><td>prisma/schema/product.prisma</td><td>Product</td></tr>
+    <tr><td>prisma/schema/cart.prisma</td><td>Cart, CartItem</td></tr>
+    <tr><td>prisma/schema/order.prisma</td><td>Order, OrderItem, OrderStatus &nbsp;&larr;&nbsp;FEATURE-005</td></tr>
+    <tr><td>prisma/schema/notification.prisma</td><td>Notification</td></tr>
+    <tr><td>prisma/schema/storefront.prisma</td><td>StorefrontAccess</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <div class="t">Two gotchas that cost real time — please don't re-discover them</div>
+  <p><strong>Prisma 6.19 does not auto-detect a schema folder.</strong> The path must be declared explicitly; it now lives in <code>apps/server/package.json</code> under the <code>prisma</code> key. This prints a deprecation warning pointing at <code>prisma.config.ts</code>. That migration was deliberately deferred: a config file disables automatic <code>.env</code> loading and would need a <code>dotenv</code> dependency.</p>
+  <p><strong>Migrations move with the schema.</strong> With a schema <em>folder</em>, Prisma resolves migrations relative to that folder, so <code>prisma/migrations/</code> is now <code>prisma/schema/migrations/</code>. Leave it in the old place and the CLI reports every existing migration as missing and demands a database reset.</p>
+</div>
+
+<h3>2.2 &nbsp;New schema fields</h3>
+<p>One additive migration, <code>20260902200917_catalog_fields</code>. No data loss, no reset.</p>
+<table>
+  <thead><tr><th style="width:20%">Model</th><th>Added</th></tr></thead>
+  <tbody>
+    <tr><td><code>Category</code></td><td><code>description</code>, <code>icon</code>, <code>imageUrl</code>, <code>sortOrder</code>, <code>isActive</code> &middot; index on <code>(isActive, sortOrder)</code></td></tr>
+    <tr><td><code>Product</code></td><td><code>compareAtPrice</code>, <code>rating</code>, <code>reviewCount</code>, <code>isFeatured</code>, <code>isActive</code> &middot; index on <code>(isActive, isFeatured)</code></td></tr>
+  </tbody>
+</table>
+<p class="tight"><code>compareAtPrice</code> is the &ldquo;was&rdquo; price. The discount percentage is <em>derived server-side</em>, never stored, so it cannot drift out of sync with the price.</p>
+
+<h3>2.3 &nbsp;API surface</h3>
+<table>
+  <thead><tr><th style="width:8%">Verb</th><th style="width:37%">Route</th><th style="width:14%">Access</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td class="files">/api/categories</td><td>Public</td><td>Active categories, ordered by <code>sortOrder</code>, with product counts</td></tr>
+    <tr><td>GET</td><td class="files">/api/categories/:slug</td><td>Public</td><td>One category</td></tr>
+    <tr><td>GET</td><td class="files">/api/categories/manage/all</td><td>Admin</td><td>Includes hidden categories</td></tr>
+    <tr><td colspan="2" class="files">POST / PATCH / DELETE&nbsp;&nbsp;/api/categories</td><td>Admin</td><td>Delete refuses while products remain</td></tr>
+    <tr><td>GET</td><td class="files">/api/products</td><td>Public</td><td><code>category</code>, <code>search</code>, <code>featured</code>, <code>onSale</code>, <code>sort</code>, <code>page</code>, <code>limit</code></td></tr>
+    <tr><td>GET</td><td class="files">/api/products/:slug</td><td>Public</td><td>One product</td></tr>
+    <tr><td>GET</td><td class="files">/api/products/manage/all</td><td>Admin</td><td>Includes hidden products</td></tr>
+    <tr><td colspan="2" class="files">POST / PATCH / DELETE&nbsp;&nbsp;/api/products</td><td>Admin</td><td>Delete refuses if the product is on an order</td></tr>
+  </tbody>
+</table>
+<p class="tight">Admin routes sit behind <code>JwtAuthGuard</code> + <code>RolesGuard</code> + <code>@Roles(Role.ADMIN)</code>, matching the pattern Kenule established in <code>auth/</code>. The literal <code>manage/all</code> route is declared <em>before</em> <code>:slug</code> so the parameterised route does not swallow it.</p>
+
+<h3>2.4 &nbsp;Three implementation details worth knowing</h3>
+<ul>
+  <li><strong>Decimal &rarr; number.</strong> Prisma returns <code>Decimal</code> instances that JSON-serialize as <em>strings</em>, which silently breaks arithmetic in the browser. Both services map them to numbers before returning. Any new module reading <code>price</code> should do the same.</li>
+  <li><strong>Column-to-column filtering.</strong> <code>onSale</code> compares <code>compareAtPrice &gt; price</code> using Prisma <em>field references</em> inside <code>where</code>. Filtering in JS after the query would corrupt <code>total</code> and produce short pages.</li>
+  <li><strong>Deactivate, don't delete.</strong> Products referenced by an <code>OrderItem</code> cannot be deleted; the API returns a message telling the admin to deactivate instead. This protects order history &mdash; directly relevant to FEATURE-005.</li>
+</ul>
+
+<h3>2.5 &nbsp;Admin panel and storefront</h3>
+<ul>
+  <li>Admin gains real <strong>Categories</strong> and <strong>Products</strong> pages (full CRUD, category filter, modal forms) built on the tokens already in <code>styles.css</code>. They replace the placeholder pages.</li>
+  <li><code>AdminLayout</code> used Tailwind classes that <strong>do not exist</strong> in the admin theme &mdash; <code>bg-bg</code>, <code>bg-surface</code>, <code>border-border</code>, <code>text-text</code>, <code>text-star</code> &mdash; while <code>styles.css</code> defines <code>--color-admin-*</code>. They compiled to nothing, leaving the background, body text, panel surfaces and header border unstyled. Now mapped onto the tokens that exist.</li>
+  <li><code>apps/client/src/components/home/data.ts</code> is <strong>deleted</strong>. Category nav, category grid, hero rails, flash sale and trending rows all read from the API.</li>
+  <li>The catalog page gains search, sort and pagination and serves both <code>/products</code> and <code>/category/:slug</code>; <code>/products/:slug</code> is now a real product detail page.</li>
+  <li>Cross-app navigation was missing entirely: the admin sidebar gains <em>View storefront</em>, and the storefront top bar gains <em>Home</em> and <em>Admin</em>. Separate origins, so these are plain anchors driven by <code>VITE_STOREFRONT_URL</code> / <code>VITE_ADMIN_URL</code>.</li>
+</ul>
+
+<h2 class="pagebreak"><span class="num">3</span>Running it locally</h2>
+
+<p>Two helper scripts sit at the repository root. Both were broken in ways that are easy to misread as &ldquo;the project doesn't work&rdquo;, and both are fixed in PR&nbsp;#7.</p>
+
+<table>
+  <thead><tr><th style="width:34%">Script</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td class="files">launch-webapp.bat</td><td>Starts the <code>gmc-postgres</code> container on port <strong>5433</strong>, waits for it, runs <code>prisma generate</code> and <code>migrate deploy</code>, compiles the server once, then opens three terminals (API, storefront, admin) and polls the API before reporting success.</td></tr>
+    <tr><td class="files">stop-webapp.bat</td><td>Frees ports 3000 / 5173 / 5174, closes the three terminals, stops the container. Data survives in the Docker volume.</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <div class="t">Why the API used to die on launch while the two frontends came up fine</div>
+  <p>The script deleted <code>apps\server\dist</code> and immediately ran <code>nest start --watch</code>. The watcher launches <code>dist/src/main.js</code> the moment it appears, so against an empty dist it <em>raced the compiler</em> and exited with <code>Cannot find module './app.module'</code>. Nest only retries on a file change, so the API stayed dead and silent. It now compiles once before the watcher starts.</p>
+  <p>Two smaller fixes: <code>timeout /t 1</code> aborts with &ldquo;input redirection is not supported&rdquo; when stdin is redirected, so the DB wait loop uses <code>ping</code>; and the script now warns explicitly instead of printing the URLs while the API is down.</p>
+</div>
+
+<div class="box info">
+  <div class="t">If the API will not start</div>
+  <p>Check <code>docker ps</code> first. A stopped <code>gmc-postgres</code> makes Nest exit at boot with Prisma <code>P1001 &mdash; Can't reach database server at localhost:5433</code>. Note the port is <strong>5433</strong>, not the default 5432.</p>
+</div>
+
+<p><strong>Seed accounts</strong> all use <code>Student123!</code>: <code>admin@example.com</code> (ADMIN), <code>student1@example.com</code>, <code>student2@example.com</code>. Note the storefront login at <code>/api/auth/login</code> deliberately rejects ADMIN accounts; admins sign in at <code>/api/admin/auth/login</code>.</p>
+
+<h2><span class="num">4</span>Catalog data</h2>
+
+<p>The seed now creates a coherent catalog &mdash; 6 categories and 12 products with real prices, stock, ratings, sale prices and imagery &mdash; and is idempotent on slug, so re-running it is safe.</p>
+
+<div class="box ok">
+  <div class="t">Data cleanup applied to the shared dev database</div>
+  <p>The original starter seed had left <code>Electronics</code> and <code>Home</code> categories holding a <em>Wireless Headphones</em> and a <em>Desk Lamp</em> &mdash; placeholders that do not belong in a games catalog and were appearing in the storefront navigation. Both products were reassigned to <code>Accessories</code> and the two empty categories were removed. Current state: <strong>6 categories, 14 products, 0 products with a dangling category</strong>.</p>
+</div>
+
+<h2><span class="num">5</span>FEATURE-003 and FEATURE-004 — verification</h2>
+
+<p>Both were reviewed against their tickets in <code>docs/tickets/</code>. Both are implemented and meet their acceptance criteria.</p>
+
+<table>
+  <thead><tr><th style="width:26%">Acceptance criterion</th><th class="c" style="width:11%">Met</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td colspan="3" style="background:#f1efe9;font-weight:700">FEATURE-003 — Category Management (PR #4)</td></tr>
+    <tr><td>Only admins mutate</td><td class="c yes">Yes</td><td>Guards on every write; verified 401 unauthenticated, 403 with a CUSTOMER token</td></tr>
+    <tr><td>Unique names / slugs</td><td class="c yes">Yes</td><td>Pre-write check returning a clean 409 instead of a raw Prisma P2002</td></tr>
+    <tr><td>DTO validation</td><td class="c yes">Yes</td><td><code>class-validator</code> DTOs behind the global ValidationPipe</td></tr>
+    <tr><td>RTK Query invalidation</td><td class="c yes">Yes</td><td>Tag-based invalidation on the client slice</td></tr>
+    <tr><td>Admin + public UI paths</td><td class="c yes">Yes</td><td>Public categories page; admin CRUD arrives with PR #7</td></tr>
+    <tr><td colspan="3" style="background:#f1efe9;font-weight:700">FEATURE-004 — Shopping Cart (PR #5)</td></tr>
+    <tr><td>Add / remove / update / clear</td><td class="c yes">Yes</td><td>All four implemented in <code>cart.service.ts</code></td></tr>
+    <tr><td>Quantities validated</td><td class="c yes">Yes</td><td><code>assertStock</code> rejects quantities above available stock</td></tr>
+    <tr><td>Totals use server prices</td><td class="c yes">Yes</td><td>Line totals and subtotal computed from <code>product.price</code>, never from the client</td></tr>
+    <tr><td>Users only access their cart</td><td class="c yes">Yes</td><td>Every query scoped by <code>userId</code>; removal uses a cart-scoped <code>deleteMany</code></td></tr>
+    <tr><td>Cart UI states</td><td class="c yes">Yes</td><td><code>CartPage.tsx</code> handles empty / loading / error</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <div class="t">Neither is merged yet — and the cart is not usable on the Kenule branch alone</div>
+  <p>On <code>feat(kenule)/auth</code> there is no <code>/cart</code> route, the cart badge is hardcoded to <code>0</code>, and &ldquo;Add to Cart&rdquo; does nothing. Kenule's client-only <code>features/cart/cartSlice.ts</code> and PR&nbsp;#5's server-backed cart are two competing sources of truth &mdash; <strong>the team needs to pick one</strong>. Prefer the server cart: it is the only one that can price an order correctly.</p>
+</div>
+
+<h2><span class="num">6</span>The conflict between PR #7 and PR #4 — please read</h2>
+
+<p>PR&nbsp;#4 already delivers FEATURE-003. PR&nbsp;#7 was built before that was taken into account and <strong>independently adds its own <code>apps/server/src/categories/</code> module at the same file paths</strong>. Both cannot be merged as they stand.</p>
+
+<table>
+  <thead><tr><th style="width:40%">&nbsp;</th><th class="c" style="width:22%">PR #4</th><th class="c" style="width:22%">PR #7</th></tr></thead>
+  <tbody>
+    <tr><td>Category CRUD API</td><td class="c yes">Yes</td><td class="c yes">Yes</td></tr>
+    <tr><td>Unit test (<code>categories.service.spec.ts</code>)</td><td class="c yes">Yes</td><td class="c no">No</td></tr>
+    <tr><td>Products-by-category</td><td class="c files">/categories/:slug/products</td><td class="c files">/products?category=slug</td></tr>
+    <tr><td>Uniqueness conflict status</td><td class="c">409</td><td class="c">400</td></tr>
+    <tr><td><code>icon</code> / <code>sortOrder</code> / <code>isActive</code> / <code>imageUrl</code></td><td class="c no">No</td><td class="c yes">Yes</td></tr>
+    <tr><td>Admin CRUD UI</td><td class="c no">No</td><td class="c yes">Yes</td></tr>
+    <tr><td>Products module</td><td class="c no">No</td><td class="c yes">Yes</td></tr>
+    <tr><td>Storefront wired to the API</td><td class="c">categories page only</td><td class="c yes">whole storefront</td></tr>
+  </tbody>
+</table>
+
+<div class="box info">
+  <div class="t">Recommended resolution</div>
+  <p>Merge <strong>#4</strong> first and keep its service and its test as the canonical category implementation. Then rebase <strong>#7</strong> onto the result and re-apply only three things: the extra <code>Category</code> columns, the products module, and the admin UI. Everything in #7 outside <code>categories/</code> &mdash; products, the storefront rewrite, the Prisma split, the script fixes &mdash; is additive and should rebase cleanly.</p>
+</div>
+
+<h2 class="pagebreak"><span class="num">7</span>For Raead — what FEATURE-005 can build on</h2>
+
+<p>Orders is a module plus a frontend slice. <code>Order</code>, <code>OrderItem</code> and <code>OrderStatus</code> already exist in Prisma, so <strong>no migration is required</strong>. Once PR&nbsp;#7 lands, these are ready to use:</p>
+
+<ul>
+  <li><strong>A products module to read from.</strong> <code>ProductsService</code> already returns prices as numbers, so order totals can be computed without unwrapping <code>Decimal</code> yourself.</li>
+  <li><strong>Stock and price on every product.</strong> <code>stock</code> for availability checks, <code>price</code> for the <code>unitPrice</code> snapshot on each <code>OrderItem</code>.</li>
+  <li><strong>Deletion already protects order history.</strong> A product on an order line cannot be deleted, so <code>OrderItem.productId</code> will not dangle. Keep this rule in mind if you add order-side deletes.</li>
+  <li><strong>An admin shell to extend.</strong> Add an Orders page next to Categories and Products; reuse the shared primitives in <code>apps/admin/src/components/ui.tsx</code> (<code>Field</code>, <code>Input</code>, <code>Select</code>, <code>Modal</code>, <code>Banner</code>) and the <code>errorMessage</code> helper so validation errors surface properly. The sidebar already has an <code>/orders</code> placeholder route to replace.</li>
+  <li><strong>A guard pattern to copy.</strong> <code>products.controller.ts</code> is the shortest example of public reads plus admin-only writes on one controller, including the <code>manage/all</code>-before-<code>:slug</code> route-ordering rule.</li>
+</ul>
+
+<div class="box warn">
+  <div class="t">Your one real decision: which cart feeds an order</div>
+  <p>An order is created from a cart, and there are currently two carts. Design against PR&nbsp;#5's <strong>server cart</strong> &mdash; it computes subtotals from database prices, which is what an order needs. If #5 has not merged when you start, branch from <code>feat/kenule-shopping-cart</code> rather than from the Kenule branch, or build the Orders module against the Prisma models directly and wire the cart link once #5 lands.</p>
+</div>
+
+<h3>Snapshot the price at purchase time</h3>
+<p><code>OrderItem.unitPrice</code> exists precisely so an order keeps the price that was charged. Copy <code>product.price</code> into it when the order is created &mdash; never join back to <code>Product</code> to display a historical order, or every past order changes whenever an admin edits a price in the panel.</p>
+
+<h2><span class="num">8</span>Commits in PR #7</h2>
+<table>
+  <thead><tr><th style="width:16%">Commit</th><th>Subject</th></tr></thead>
+  <tbody>
+    <tr><td class="files">8c76844</td><td>feat(catalog): admin-managed products and categories</td></tr>
+    <tr><td class="files">7fc0d8c</td><td>fix(ui): repair admin theme tokens and add cross-app navigation</td></tr>
+    <tr><td class="files">4b474cb</td><td>chore(scripts): fix the local launch/stop helpers</td></tr>
+  </tbody>
+</table>
+
+<h3>Verification performed before opening the PR</h3>
+<ul>
+  <li><code>tsc --noEmit</code> clean on server, admin and client (with PR&nbsp;#6 applied &mdash; without it the build fails on TypeScript&nbsp;5.9).</li>
+  <li>Guards: 401 unauthenticated, 403 with a CUSTOMER token on an admin write.</li>
+  <li>Validation: 400 for <code>compareAtPrice &le; price</code>; 400 deleting a category that still holds products.</li>
+  <li>Full round trip through the admin UI &mdash; created a product, confirmed slug generation and the derived discount, saw it appear on the storefront category page and its detail page, then deleted it and confirmed a 404.</li>
+  <li>Both scripts run end to end: <code>stop</code> frees all three ports and stops the container; <code>launch</code> brings all three services up.</li>
+</ul>
+
+<div class="foot">
+  Prepared by Mohamed Reda Dahdah (mrdahdah) &middot; 2 September 2026 &middot; Ghaythhezami/gmc-eccomerce &middot; companion to <code>docs/ADMIN-MANAGED-CATALOG.md</code>
+</div>
+
+</body>
+</html>
