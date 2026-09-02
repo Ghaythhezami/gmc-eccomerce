@@ -24,7 +24,11 @@ import {
   X,
   UserCircle,
   Settings2,
+  Store,
 } from 'lucide-react';
+
+// The storefront is a separate Vite app, so this is a real navigation, not a route.
+const STOREFRONT_URL = import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:5173';
 
 // Catalog pages are fully built; these two are still feature-ticket placeholders.
 const pages = [
@@ -53,7 +57,7 @@ export function AdminLayout() {
   `;
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col lg:flex-row font-sans text-text">
+    <div className="min-h-screen bg-admin-bg flex flex-col lg:flex-row font-sans text-admin-text">
       {/* Top Mobile Bar */}
       <header className="lg:hidden flex items-center justify-between bg-[#20231f] text-white px-4 py-3 border-b border-white/10 sticky top-0 z-5">
         <div className="flex items-center gap-2">
@@ -162,6 +166,14 @@ export function AdminLayout() {
 
         {/* User Session Info & Sign Out */}
         <div className="pt-6 mt-6 border-t border-white/10 space-y-4 shrink-0">
+          <a
+            href={STOREFRONT_URL}
+            className="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium text-zinc-400 transition-all duration-200 hover:bg-white/10 hover:text-white"
+          >
+            <Store size={18} />
+            <span>View storefront</span>
+          </a>
+
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
             <UserCircle size={20} className="text-amber-400 shrink-0" />
             <div className="overflow-hidden text-xs">
@@ -182,19 +194,19 @@ export function AdminLayout() {
 
       {/* Main Content Area */}
       <article className="flex-1 w-full min-w-0 p-6 lg:p-10">
-        <header className="mb-8 pb-6 border-b border-border flex flex-wrap items-center justify-between gap-4">
+        <header className="mb-8 pb-6 border-b border-admin-border flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="eyebrow text-primary font-display font-bold text-xs uppercase tracking-widest mb-1 flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-star" /> System Privilege Verified
+              <ShieldCheck size={14} className="text-accent-gold" /> System Privilege Verified
             </p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text font-display tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-admin-text font-display tracking-tight">
               Command Center
             </h1>
           </div>
 
-          <div className="text-xs text-text/70 bg-surface px-3.5 py-2 rounded-lg border border-border shadow-2xs flex items-center gap-2">
+          <div className="text-xs text-admin-text/70 bg-admin-surface px-3.5 py-2 rounded-lg border border-admin-border shadow-2xs flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Connected as <strong className="text-text">{user?.email}</strong></span>
+            <span>Connected as <strong className="text-admin-text">{user?.email}</strong></span>
           </div>
         </header>
 

@@ -8,6 +8,9 @@ export function CategoryNav() {
   return (
     <nav className="category-nav">
       <div className="container">
+        <Link to="/" className={`cat-link ${pathname === '/' ? 'active' : ''}`}>
+          Home
+        </Link>
         <Link to="/products" className={`cat-link ${pathname === '/products' ? 'active' : ''}`}>
           All Products
         </Link>
