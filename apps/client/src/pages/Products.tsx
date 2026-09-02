@@ -50,6 +50,8 @@ export function Products() {
     setSearchParams(next);
   };
 
+  const submitSearch = () => patchParams({ q: searchDraft, page: null });
+
   const title = activeCategory?.name ?? 'All Products';
 
   return (
@@ -72,7 +74,7 @@ export function Products() {
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            patchParams({ q: searchDraft, page: null });
+            submitSearch();
           }}
           className="flex flex-1 gap-2"
         >
@@ -80,6 +82,13 @@ export function Products() {
             type="search"
             value={searchDraft}
             onChange={(event) => setSearchDraft(event.target.value)}
+            onKeyDown={(event) => {
+              // Explicit, so Enter never depends on implicit form submission.
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                submitSearch();
+              }
+            }}
             placeholder="Search the catalog…"
             aria-label="Search products"
             className="min-w-0 flex-1 rounded-md border border-[#c8c4b9] bg-white px-3 py-2 text-sm outline-none focus:border-[#a34f32]"

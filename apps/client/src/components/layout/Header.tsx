@@ -21,11 +21,17 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
   const { data: cart } = useGetCartQuery(undefined, { skip: !user });
   const liveCartCount = cart?.itemCount ?? cartCount;
 
-  const runSearch = (event: React.FormEvent) => {
-    event.preventDefault();
+  const runSearch = (event?: { preventDefault: () => void }) => {
+    event?.preventDefault();
     const term = searchQuery.trim();
     navigate(term ? `/products?q=${encodeURIComponent(term)}` : '/products');
     setIsMobileMenuOpen(false);
+  };
+
+  // Enter normally submits the form implicitly, but handling the key directly
+  // means search still works if that ever fails to fire.
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') runSearch(event);
   };
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -47,6 +53,7 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={onSearchKeyDown}
               className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 border-2 border-[#a34f32] border-r-0 rounded-l-md outline-none bg-[#fffdf8] text-sm focus:shadow-[0_0_0_3px_rgba(163,79,50,0.15)]"
               placeholder="Search games, genres, masterclasses..." 
             />
@@ -135,6 +142,7 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={onSearchKeyDown}
                 className="flex-1 px-3 py-2 border-2 border-[#a34f32] border-r-0 rounded-l-md outline-none bg-[#fffdf8] text-sm"
                 placeholder="Search games..." 
               />
