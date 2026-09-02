@@ -102,13 +102,13 @@
     <div><span class="k">For</span><span class="v">Kenule (branch owner) &middot; Ghayth (maintainer) &middot; Raead (FEATURE-005) &middot; the team</span></div>
     <div><span class="k">Date</span><span class="v">2 September 2026</span></div>
     <div><span class="k">Repository</span><span class="v">Ghaythhezami/gmc-eccomerce &mdash; base branch feat(kenule)/auth</span></div>
-    <div><span class="k">This work</span><span class="v">PR #7 &middot; branch feat/kenule-admin-catalog &middot; 3 commits &middot; 55 files &middot; +2710 / &minus;305</span></div>
+    <div><span class="k">This work</span><span class="v">PR #7 &middot; branch feat/kenule-admin-catalog &middot; 6 commits</span></div>
   </div>
 </div>
 
 <div class="box tldr">
   <div class="t">TL;DR</div>
-  <p>The storefront catalog was hardcoded in a single file, and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, and fixes the local launch scripts.</p>
+  <p>The storefront catalog was hardcoded in a single file and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, adds VAPID web push, a real newsletter and a configurable flash sale, introduces the first API tests, and fixes the local launch scripts.</p>
   <p><strong>Before merging, read section 6.</strong> PR&nbsp;#7 re-implements category CRUD that PR&nbsp;#4 already delivers, at the same file paths. The two conflict and must be reconciled &mdash; merge&nbsp;#4 first, then rebase&nbsp;#7 onto it.</p>
 </div>
 
@@ -201,6 +201,33 @@
   <li>Cross-app navigation was missing entirely: the admin sidebar gains <em>View storefront</em>, and the storefront top bar gains <em>Home</em> and <em>Admin</em>. Separate origins, so these are plain anchors driven by <code>VITE_STOREFRONT_URL</code> / <code>VITE_ADMIN_URL</code>.</li>
 </ul>
 
+<h3>2.6 &nbsp;Web push over VAPID</h3>
+<ul>
+  <li>A <code>PushSubscription</code> row per browser, so one account can be reached on several devices. The endpoint is unique, so re-subscribing the same browser updates its keys instead of piling up duplicate rows.</li>
+  <li>Delivery is <strong>best-effort</strong>: a failed send never fails the request that triggered it, and subscriptions the push service reports as gone (404/410) are pruned automatically.</li>
+  <li>The app still boots without VAPID keys &mdash; push simply reports itself disabled, so nobody needs a keypair just to run the catalog. Generate a pair with web-push and put it in <code>apps/server/.env</code> (see <code>.env.example</code>).</li>
+  <li>Endpoints: <code>GET /api/notifications/vapid-public-key</code> (public), subscribe / unsubscribe, list, unread-count, mark one or all read, and <code>POST /api/notifications/broadcast</code> (admin).</li>
+  <li>The client registers <code>public/sw.js</code>, which renders the push and focuses an existing tab on click rather than opening a duplicate.</li>
+</ul>
+
+<h3>2.7 &nbsp;Storefront content the admin now owns</h3>
+<ul>
+  <li><strong>Flash sale.</strong> The countdown used to be a hardcoded <code>04:32:15</code> that never moved. It now runs down to a real end time, and the strip&rsquo;s headline, end time and visibility are set on the new admin Marketing page. Which products appear is still automatic &mdash; anything whose compare-at price exceeds its price.</li>
+  <li><strong>Newsletter.</strong> The form submitted nowhere. There is now a <code>NewsletterSubscriber</code> table, public subscribe / unsubscribe and an admin list. Sign-up is idempotent, and the response deliberately does not reveal whether an address was already on the list.</li>
+  <li><strong>Dashboard.</strong> It displayed invented figures &mdash; a hardcoded &ldquo;+12.5%&rdquo;, zero products, &ldquo;Latency: 24ms&rdquo;. It now reads a real <code>/api/admin/stats</code> endpoint.</li>
+</ul>
+
+<h3>2.8 &nbsp;Toasts and other gaps closed</h3>
+<ul>
+  <li>A shared <code>ToastProvider</code> in both apps: auto-dismissing stack, success / error / info tones, <code>aria-live</code> (assertive for errors), and an entrance animation gated behind <code>motion-safe</code>. Inline banners are kept for form validation errors, which belong next to the field rather than in a corner.</li>
+  <li><code>/help</code>, <code>/support</code> and <code>/sell</code> were linked from the header and top bar but had no routes, so they fell through to the 404. All three now render.</li>
+  <li>The header search box did nothing; both the desktop and mobile inputs are now forms that navigate to <code>/products?q=&hellip;</code>.</li>
+  <li>The catch-all route redirected silently to <code>/</code>, hiding genuinely dead links. Replaced with a real 404 page.</li>
+  <li>The profile page showed only what was cached at login; it now re-reads <code>/auth/me</code> and surfaces role, join date and unread notifications.</li>
+  <li>Logout only reset <code>authApi</code>, so the next account could briefly see the previous user&rsquo;s cached notifications. All user-scoped caches are cleared.</li>
+  <li><code>AdminLayout</code> referenced Tailwind classes absent from the admin theme (<code>bg-bg</code>, <code>bg-surface</code>, <code>border-border</code>, <code>text-text</code>, <code>text-star</code>), which compiled to nothing and left the panel unstyled. Mapped onto the <code>--color-admin-*</code> tokens that exist.</li>
+</ul>
+
 <h2 class="pagebreak"><span class="num">3</span>Running it locally</h2>
 
 <p>Two helper scripts sit at the repository root. Both were broken in ways that are easy to misread as &ldquo;the project doesn't work&rdquo;, and both are fixed in PR&nbsp;#7.</p>
@@ -235,9 +262,31 @@
   <p>The original starter seed had left <code>Electronics</code> and <code>Home</code> categories holding a <em>Wireless Headphones</em> and a <em>Desk Lamp</em> &mdash; placeholders that do not belong in a games catalog and were appearing in the storefront navigation. Both products were reassigned to <code>Accessories</code> and the two empty categories were removed. Current state: <strong>6 categories, 14 products, 0 products with a dangling category</strong>.</p>
 </div>
 
-<h2><span class="num">5</span>FEATURE-003 and FEATURE-004 — verification</h2>
+<h2><span class="num">5</span>Ticket verification &mdash; FEATURE-001 to 004</h2>
 
-<p>Both were reviewed against their tickets in <code>docs/tickets/</code>. Both are implemented and meet their acceptance criteria.</p>
+<p>Each was reviewed against its ticket in <code>docs/tickets/</code>. Three criteria were unmet and are fixed in PR&nbsp;#7; everything else already held.</p>
+
+<table>
+  <thead><tr><th style="width:26%">Acceptance criterion</th><th class="c" style="width:11%">Met</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td colspan="3" style="background:#f1efe9;font-weight:700">FEATURE-001 &mdash; Authentication (already on the Kenule branch)</td></tr>
+    <tr><td>Duplicate emails rejected</td><td class="c yes">Yes</td><td>409 from the register endpoint</td></tr>
+    <tr><td>Invalid credentials rejected</td><td class="c yes">Yes</td><td>401, same message for unknown user and wrong password</td></tr>
+    <tr><td>Passwords hashed</td><td class="c yes">Yes</td><td>bcrypt cost 10; only safe user objects are returned</td></tr>
+    <tr><td><code>/auth/me</code> requires JWT</td><td class="c yes">Yes</td><td>Behind <code>JwtAuthGuard</code>; 401 without a token</td></tr>
+    <tr><td>Admin routes reject customers</td><td class="c yes">Yes</td><td>Verified 403 with a CUSTOMER token on an admin write</td></tr>
+    <tr><td>Logout clears auth <em>and</em> cached API state</td><td class="c" style="color:#a5271b;font-weight:700">Fixed</td><td>Only <code>authApi</code> was reset, so the next account could briefly see the previous user&rsquo;s cached notifications. All user-scoped caches are now cleared.</td></tr>
+
+    <tr><td colspan="3" style="background:#f1efe9;font-weight:700">FEATURE-002 &mdash; Product Catalog (delivered by PR #7)</td></tr>
+    <tr><td>Products include category data</td><td class="c yes">Yes</td><td>Every product payload embeds its category</td></tr>
+    <tr><td>Invalid IDs return proper errors</td><td class="c yes">Yes</td><td>404 for an unknown slug; 400 for a bad category on write</td></tr>
+    <tr><td>Search and pagination server-side</td><td class="c yes">Yes</td><td>Prisma <code>skip</code>/<code>take</code>, with <code>total</code> and <code>pageCount</code> in the response</td></tr>
+    <tr><td>Loading / empty / error states</td><td class="c" style="color:#a5271b;font-weight:700">Fixed</td><td>Loading and empty existed; the error state was missing and now has a retry action</td></tr>
+    <tr><td>API tests exist</td><td class="c" style="color:#a5271b;font-weight:700">Fixed</td><td>There was no jest configuration and jest was not installed. Both added, plus 27 passing unit tests.</td></tr>
+  </tbody>
+</table>
+
+<p>FEATURE-003 and FEATURE-004 live in PRs&nbsp;#4 and&nbsp;#5. Both are implemented and meet their acceptance criteria:</p>
 
 <table>
   <thead><tr><th style="width:26%">Acceptance criterion</th><th class="c" style="width:11%">Met</th><th>Evidence</th></tr></thead>
@@ -312,12 +361,19 @@
     <tr><td class="files">8c76844</td><td>feat(catalog): admin-managed products and categories</td></tr>
     <tr><td class="files">7fc0d8c</td><td>fix(ui): repair admin theme tokens and add cross-app navigation</td></tr>
     <tr><td class="files">4b474cb</td><td>chore(scripts): fix the local launch/stop helpers</td></tr>
+    <tr><td class="files">b8454a0</td><td>docs: team handoff PDF for merging PR #7 alongside #4 and #5</td></tr>
+    <tr><td class="files">e4721de</td><td>feat(notifications): VAPID web push, real dashboard stats, and gap fixes</td></tr>
+    <tr><td class="files">4fa1b76</td><td>feat(ux): toast notifications, API tests, and FEATURE-001/002 gap fixes</td></tr>
+    <tr><td class="files">34083cf</td><td>feat(storefront): newsletter, configurable flash sale, help pages, real profile</td></tr>
   </tbody>
 </table>
 
 <h3>Verification performed before opening the PR</h3>
 <ul>
   <li><code>tsc --noEmit</code> clean on server, admin and client (with PR&nbsp;#6 applied &mdash; without it the build fails on TypeScript&nbsp;5.9).</li>
+  <li><strong>27 unit tests pass</strong> over <code>ProductsService</code> and <code>CategoriesService</code>. The server had no jest configuration at all and jest itself was not installed; both were added, which is what FEATURE-002&rsquo;s &ldquo;API tests exist&rdquo; criterion needs.</li>
+  <li>Push pipeline exercised end to end: a broadcast stored a notification for every user, attempted delivery, and pruned the dead subscription &mdash; while still returning success, confirming push failures do not break the request.</li>
+  <li>Newsletter, flash-sale configuration and their guards checked over HTTP.</li>
   <li>Guards: 401 unauthenticated, 403 with a CUSTOMER token on an admin write.</li>
   <li>Validation: 400 for <code>compareAtPrice &le; price</code>; 400 deleting a category that still holds products.</li>
   <li>Full round trip through the admin UI &mdash; created a product, confirmed slug generation and the derived discount, saw it appear on the storefront category page and its detail page, then deleted it and confirmed a 404.</li>
