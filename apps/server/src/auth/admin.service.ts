@@ -1,16 +1,23 @@
 // apps/server/src/auth/admin.service.ts
 import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AdminService {
+  private googleClient: OAuth2Client;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(this.config.get<string>('GOOGLE_CLIENT_ID'));
+  }
 
   // Admin-specific login
   async adminLogin(email: string, password: string) {
@@ -30,7 +37,7 @@ export class AdminService {
     };
   }
 
-  // Admin-specific registration (ONLY use this in development, or use a seed script)
+  // Admin-specific registration
   async adminRegister(dto: any) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
     if (existing) throw new ConflictException('Email is already registered');
@@ -51,32 +58,61 @@ export class AdminService {
     };
   }
 
-  // NEW: Admin Google Login (Only allow existing ADMINS)
+  // Admin Google Login
   async validateAdminGoogleToken(googleToken: string) {
     try {
-      // 1. Decode the Google token to get user info
-      const payload: any = this.jwt.decode(googleToken);
+      // 1. Get token info
+      const tokenInfo = await this.googleClient.getTokenInfo(googleToken);
+      const googleId = tokenInfo.sub;
 
-      // 2. Extract user info from Google
-      const email = payload.email;
-      const googleId = payload.sub;
+      // 2. Fetch the FULL user profile from Google
+      interface GoogleUserInfo {
+        email: string;
+        given_name?: string;
+        family_name?: string;
+        name?: string;
+      }
 
-      // 3. Only allow login if user already exists AND is ADMIN
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${googleToken}` },
+      });
+      const userInfo = (await response.json()) as GoogleUserInfo;
+
+      const email = userInfo.email;
+      const firstName = userInfo.given_name || userInfo.name || 'Google';
+      const lastName = userInfo.family_name || 'User';
+
+      // 3. Check if user exists
       let user = await this.prisma.user.findFirst({
         where: { OR: [{ googleId }, { email }] },
       });
 
-      if (!user || user.role !== 'ADMIN') {
-        throw new UnauthorizedException('Only registered admin accounts can access this portal.');
+      // 4. Create a new ADMIN if user doesn't exist
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            email,
+            firstName,
+            lastName,
+            googleId,
+            role: 'ADMIN',
+          },
+        });
       }
 
-      // 4. Generate JWT
+      // 5. Generate JWT
       const accessToken = this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
-      return { user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, accessToken };
+      return { 
+        user: { 
+          id: user.id, 
+          firstName: user.firstName, 
+          lastName: user.lastName, 
+          email: user.email, 
+          role: user.role 
+        }, 
+        accessToken 
+      };
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new UnauthorizedException('Invalid Google token');
     }
   }
@@ -117,13 +153,13 @@ export class AdminService {
     return this.prisma.user.delete({ where: { id } });
   }
 
-  // Get current storefront allowed roles (default to CUSTOMER)
+  // Get current storefront allowed roles
   async getStorefrontAccess() {
     const access = await this.prisma.storefrontAccess.findFirst();
     return { allowedRoles: access?.allowedRoles ?? ['CUSTOMER'] };
   }
 
-  // Update allowed roles (admin only)
+  // Update allowed roles
   async updateStorefrontAccess(allowedRoles: string[]) {
     const existing = await this.prisma.storefrontAccess.findFirst();
     if (existing) {
@@ -139,5 +175,14 @@ export class AdminService {
 
   async getAllRoles() {
     return Object.values(Role);
+  }
+
+    // Get current admin by ID
+  async getAdminById(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user || user.role !== 'ADMIN') {
+      throw new UnauthorizedException('User no longer exists');
+    }
+    return { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role };
   }
 }

@@ -1,13 +1,13 @@
 // apps/admin/src/AdminLayout.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { logout } from './features/auth/authSlice';
-import { authApi } from './features/auth/authApi';
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { authApi, useMeQuery } from './features/auth/authApi'; // <-- Combined import!
+import { Link, Route, Routes, useLocation, useNavigate  } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
-import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
+import { StorefrontAccess } from './pages/StorefrontAccess'; 
 import { 
   LayoutDashboard, 
   Users as UsersIcon, 
@@ -36,6 +36,17 @@ export function AdminLayout() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // 🚨 Only check if user exists when they are logged in!
+  const { data: admin, isError } = useMeQuery(undefined, { skip: !user });
+
+  useEffect(() => {
+    if (isError) {
+      dispatch(logout());
+      navigate('/login');   
+    }
+  }, [isError, dispatch, navigate]);
 
   const signOut = () => {
     dispatch(logout());

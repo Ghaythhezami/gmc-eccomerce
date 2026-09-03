@@ -1,5 +1,5 @@
 // apps/server/src/auth/admin.controller.ts
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -24,6 +24,16 @@ export class AdminController {
   @ApiOperation({ summary: 'Admin register' })
   adminRegister(@Body() body: { firstName: string; lastName: string; email: string; password: string }) {
     return this.adminService.adminRegister(body);
+  }
+
+  // PROTECTED: Check if current admin exists
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('me')
+  @ApiOperation({ summary: 'Get current admin profile' })
+  async me(@Req() req: any) {
+    return this.adminService.getAdminById(req.user.id);
   }
 
   // PROTECTED (requires ADMIN role)
