@@ -96,20 +96,26 @@
 <div class="cover">
   <div class="kicker">Engineering Handoff &middot; GMC E-Commerce Platform</div>
   <h1>Admin-Managed Catalog</h1>
-  <p class="sub">What changed on the Kenule branch, how to merge it alongside PR&nbsp;#4 and PR&nbsp;#5, and what FEATURE-005 can now build on.</p>
+  <p class="sub">Status update: PR&nbsp;#7 (admin-managed catalog) and PR&nbsp;#9 (epic-5 reviews &amp; notifications) are both merged into feat(kenule)/auth, which now compiles and has been smoke-tested end to end.</p>
   <div class="meta">
     <div><span class="k">Author</span><span class="v">Mohamed Reda Dahdah (mrdahdah)</span></div>
-    <div><span class="k">For</span><span class="v">Kenule (branch owner) &middot; Ghayth (maintainer) &middot; Raead (FEATURE-005) &middot; the team</span></div>
-    <div><span class="k">Date</span><span class="v">2 September 2026</span></div>
-    <div><span class="k">Repository</span><span class="v">Ghaythhezami/gmc-eccomerce &mdash; base branch feat(kenule)/auth</span></div>
-    <div><span class="k">This work</span><span class="v">PR #7 &middot; branch feat/kenule-admin-catalog &middot; 6 commits</span></div>
+    <div><span class="k">For</span><span class="v">Kenule (branch owner) &middot; Ghayth (maintainer) &middot; Raead (epic-5) &middot; the team</span></div>
+    <div><span class="k">Date</span><span class="v">2 September 2026 &middot; updated 3 September 2026</span></div>
+    <div><span class="k">Repository</span><span class="v">Ghaythhezami/gmc-eccomerce &mdash; working branch feat(kenule)/auth</span></div>
+    <div><span class="k">Status</span><span class="v">Consolidated &mdash; PR #4, #5, #7, #9 merged; #3, #6 closed</span></div>
   </div>
+</div>
+
+<div class="box ok">
+  <div class="t">Consolidation complete (3 September 2026)</div>
+  <p>Everything now lives on <code>feat(kenule)/auth</code>: the auth foundation + Google OAuth, the admin-managed catalog (PR&nbsp;#7), FEATURE-003 categories (#4) and FEATURE-004 cart (#5), and Raead&rsquo;s epic-5 &mdash; reviews &amp; ratings, real-time socket notifications, orders pages and domain-event triggers (PR&nbsp;#9). All three apps compile (server <code>nest build</code>, client and admin <code>tsc</code>) and the stack was smoke-tested: the storefront (home, product detail with reviews) and the admin dashboard (live stats, category management) both run.</p>
+  <p><strong>Do not target <code>main</code>.</strong> Ghayth reverted <code>main</code> to its original state and asked that it not be touched &mdash; all work happens on <code>feat(kenule)/auth</code>.</p>
 </div>
 
 <div class="box tldr">
   <div class="t">TL;DR</div>
-  <p>The storefront catalog was hardcoded in a single file and the admin panel had placeholder pages where Products and Categories should be. PR&nbsp;#7 makes the whole catalog database-driven and editable from the admin panel, splits the Prisma schema into one file per module, adds VAPID web push, a real newsletter and a configurable flash sale, wires the storefront to PR&nbsp;#5&rsquo;s server cart so Add to Cart works, introduces the first API tests, and fixes the local launch scripts.</p>
-  <p><strong>Before merging, read section 6.</strong> PR&nbsp;#7 re-implements category CRUD that PR&nbsp;#4 already delivers, at the same file paths. The two conflict and must be reconciled &mdash; merge&nbsp;#4 first, then rebase&nbsp;#7 onto it.</p>
+  <p>The storefront catalog is database-driven and editable from the admin panel, the Prisma schema is split one file per module, and the branch adds VAPID web push, a configurable flash sale, the server-priced cart, reviews &amp; ratings, and real-time notifications. Two runtime fixes landed while smoke-testing: both apps are wrapped in <code>GoogleOAuthProvider</code> (they crashed to a blank screen without it), and the admin route table was restored so Products / Categories / Storefront-Access management render for real. The launcher now uses <code>prisma db push</code> (the multi-file schema has no migrations for <code>migrate deploy</code>).</p>
+  <p><strong>Setup note:</strong> the apps need <code>VITE_GOOGLE_CLIENT_ID</code> set (see <code>.env.example</code>); with it empty the Google button throws.</p>
 </div>
 
 <h2><span class="num">1</span>Every pull request at a glance</h2>
@@ -119,19 +125,19 @@
     <tr><th style="width:9%">PR</th><th style="width:31%">Branch</th><th style="width:12%">Status</th><th>What it delivers</th></tr>
   </thead>
   <tbody>
-    <tr><td><strong>#7</strong></td><td class="files">feat/kenule-admin-catalog</td><td><span class="pill p-mine">Open &middot; new</span></td><td>Admin-managed catalog: products module, category management UI, dynamic storefront, multi-file Prisma, script fixes.</td></tr>
-    <tr><td><strong>#6</strong></td><td class="files">fix/production-build-ts59</td><td><span class="pill p-open">Open</span></td><td>Production build fix for TypeScript&nbsp;5.9 (<code>ignoreDeprecations</code>). Effectively a prerequisite for everything else.</td></tr>
-    <tr><td><strong>#5</strong></td><td class="files">feat/kenule-shopping-cart</td><td><span class="pill p-open">Open</span></td><td>FEATURE-004 Shopping Cart &mdash; persistent, server-priced, stock-validated.</td></tr>
-    <tr><td><strong>#4</strong></td><td class="files">feat/kenule-category-management</td><td><span class="pill p-open">Open</span></td><td>FEATURE-003 Category Management &mdash; admin CRUD API plus public browse, with a unit test.</td></tr>
-    <tr><td><strong>#3</strong></td><td class="files">feat/kenule-review</td><td><span class="pill p-open">Open</span></td><td>Review notes on the auth foundation: Next.js rewrite, RBAC, Cloudinary, guest checkout, multi-file Prisma.</td></tr>
-    <tr><td>#2</td><td class="files">feature/shopping-cart</td><td><span class="pill p-closed">Closed</span></td><td>Superseded by #5 (retargeted from <code>main</code> onto the Kenule branch).</td></tr>
-    <tr><td>#1</td><td class="files">feature/category-management</td><td><span class="pill p-closed">Closed</span></td><td>Superseded by #4 (retargeted from <code>main</code> onto the Kenule branch).</td></tr>
+    <tr><td><strong>#9</strong></td><td class="files">raed</td><td><span class="pill p-mine">Merged</span></td><td>Epic-5 &mdash; reviews &amp; ratings, real-time socket notifications, orders pages, domain-event triggers.</td></tr>
+    <tr><td><strong>#7</strong></td><td class="files">feat/kenule-admin-catalog</td><td><span class="pill p-mine">Merged</span></td><td>Admin-managed catalog: products module, category management UI, dynamic storefront, multi-file Prisma, VAPID push, script fixes.</td></tr>
+    <tr><td><strong>#6</strong></td><td class="files">fix/production-build-ts59</td><td><span class="pill p-closed">Closed</span></td><td>TS&nbsp;5.9 build fix &mdash; superseded (the bad <code>ignoreDeprecations</code> line was fixed on both <code>main</code> and the branch).</td></tr>
+    <tr><td><strong>#5</strong></td><td class="files">feat/kenule-shopping-cart</td><td><span class="pill p-closed">Closed</span></td><td>FEATURE-004 Cart &mdash; went to <code>main</code> (since reverted); the cart on the branch is PR&nbsp;#7&rsquo;s.</td></tr>
+    <tr><td><strong>#4</strong></td><td class="files">feat/kenule-category-management</td><td><span class="pill p-closed">Closed</span></td><td>FEATURE-003 Categories &mdash; went to <code>main</code> (since reverted); categories on the branch are PR&nbsp;#7&rsquo;s.</td></tr>
+    <tr><td><strong>#3</strong></td><td class="files">feat/kenule-review</td><td><span class="pill p-closed">Closed</span></td><td>Review notes / Next.js rewrite. Not merged into the branch.</td></tr>
+    <tr><td>#2 &middot; #1</td><td class="files">feature/*</td><td><span class="pill p-closed">Closed</span></td><td>Superseded by #5 / #4.</td></tr>
   </tbody>
 </table>
 
-<div class="box info">
-  <div class="t">Suggested merge order</div>
-  <p><strong>#6</strong> (unblocks the build) &rarr; <strong>#4</strong> (categories) &rarr; <strong>#5</strong> (cart) &rarr; rebase and merge <strong>#7</strong> last, since it touches the most files and overlaps&nbsp;#4.</p>
+<div class="box ok">
+  <div class="t">Merge order &mdash; done</div>
+  <p>All of the above is already merged into <code>feat(kenule)/auth</code>. The PR&nbsp;#7 / PR&nbsp;#4 overlap described in section&nbsp;6 was resolved during consolidation (the branch uses PR&nbsp;#7&rsquo;s catalog), so that section is now historical &mdash; nothing further is needed there.</p>
 </div>
 
 <h2><span class="num">2</span>What PR #7 changes</h2>
@@ -348,6 +354,11 @@
 </div>
 
 <h2 class="pagebreak"><span class="num">7</span>For Raead — what FEATURE-005 can build on</h2>
+
+<div class="box info">
+  <div class="t">Update &mdash; epic-5 is merged</div>
+  <p>Your epic-5 (reviews &amp; ratings, real-time socket notifications, orders pages, domain events) is now merged into <code>feat(kenule)/auth</code> (PR&nbsp;#9), and the Orders API (<code>POST /orders</code>, <code>GET /orders</code>, admin status update) is live. What&rsquo;s still open: the <strong>admin Orders management page</strong> &mdash; <code>/orders</code> in the admin app is still a placeholder, so building that status/CRUD UI is the natural next piece. The guidance below still applies.</p>
+</div>
 
 <p>Orders is a module plus a frontend slice. <code>Order</code>, <code>OrderItem</code> and <code>OrderStatus</code> already exist in Prisma, so <strong>no migration is required</strong>. Once PR&nbsp;#7 lands, these are ready to use:</p>
 
