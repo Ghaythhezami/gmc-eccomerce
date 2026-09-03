@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -26,10 +26,11 @@ model User {
   firstName     String
   lastName      String
   email         String         @unique
-  passwordHash  String
+  passwordHash  String?
   role          Role           @default(CUSTOMER)
   cart          Cart?
   orders        Order[]
+  googleId      String?         @unique 
   notifications Notification[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -112,4 +113,10 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   @@index([userId, readAt])
+}
+
+model StorefrontAccess {
+  id           String   @id @default(cuid())
+  allowedRoles String[]
+  updatedAt    DateTime @updatedAt
 }
