@@ -7,6 +7,7 @@ import { Placeholder } from './pages/Placeholder';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { CategoriesPage } from './features/catalog/CategoriesPage';
 // 1. Import the hook to get allowed roles dynamically
 import { useGetStorefrontAccessQuery } from './features/storefront/storefrontApi';
 
@@ -28,6 +29,7 @@ export function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/products/:id" element={<Placeholder name="Product details" />} />
         <Route path="/login" element={<AuthPage register={false} />} />
         <Route path="/register" element={<AuthPage register />} />
