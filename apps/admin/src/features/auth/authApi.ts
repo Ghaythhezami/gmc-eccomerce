@@ -22,6 +22,10 @@ export const authApi = createApi({
     register: builder.mutation<{ user: any; accessToken: string }, any>({
       query: (body) => ({ url: 'admin/auth/register', method: 'POST', body }),
     }),
+     // NEW: Google Login for Admin
+    googleLogin: builder.mutation<{ user: any; accessToken: string }, { googleToken: string }>({
+      query: (body) => ({ url: 'admin/auth/google', method: 'POST', body }),
+    }),
     getUsers: builder.query<{ data: any[]; total: number; page: number; limit: number; totalPages: number }, { page?: number; limit?: number }>({
       query: ({ page = 1, limit = 10 }) => `admin/users?page=${page}&limit=${limit}`,
       providesTags: ['Users'],
@@ -33,4 +37,4 @@ export const authApi = createApi({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetUsersQuery, useDeleteUserMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGetUsersQuery, useDeleteUserMutation, useGoogleLoginMutation } = authApi;

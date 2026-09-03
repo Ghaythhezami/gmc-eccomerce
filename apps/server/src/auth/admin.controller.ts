@@ -79,5 +79,11 @@ export class AdminController {
   getAllRoles() {
     return this.adminService.getAllRoles();
   }
+
+  @Post('auth/google')
+  @ApiOperation({ summary: 'Admin Login with Google' })
+  async adminGoogleLogin(@Body() body: { googleToken: string }) {
+    return this.adminService.validateAdminGoogleToken(body.googleToken);
+  }
 }
 
