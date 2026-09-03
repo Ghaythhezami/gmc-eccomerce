@@ -21,7 +21,7 @@ import './styles.css';
 import { App } from './App';
 import { ToastProvider } from './components/Toast';
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-not-configured.apps.googleusercontent.com';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

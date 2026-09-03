@@ -5,6 +5,29 @@ echo ============================================
 echo   GMC E-Commerce  -  LAUNCH
 echo ============================================
 
+echo [env] Ensuring .env files exist (created with defaults if missing)...
+if not exist "apps\server\.env" (
+  (
+    echo DATABASE_URL="postgresql://postgres:postgres@localhost:5433/ecommerce?schema=public"
+    echo JWT_SECRET="local-dev-secret-change-me"
+    echo PORT=3000
+    echo CLIENT_URL="http://localhost:5173"
+    echo ADMIN_URL="http://localhost:5174"
+    echo VAPID_PUBLIC_KEY=
+    echo VAPID_PRIVATE_KEY=
+    echo VAPID_SUBJECT="mailto:admin@example.com"
+  ) > "apps\server\.env"
+  echo       created apps\server\.env
+)
+if not exist "apps\client\.env" (
+  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\client\.env"
+  echo       created apps\client\.env
+)
+if not exist "apps\admin\.env" (
+  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\admin\.env"
+  echo       created apps\admin\.env
+)
+
 echo [1/4] Starting PostgreSQL (Docker: gmc-postgres, host port 5433)...
 docker start gmc-postgres >nul 2>&1
 if errorlevel 1 (
@@ -16,25 +39,21 @@ echo [2/4] Waiting for database to accept connections...
 :waitdb
 docker exec gmc-postgres pg_isready -U postgres >nul 2>&1
 if errorlevel 1 (
-  REM ping, not timeout: timeout aborts when stdin is redirected (CI / scripted runs).
   ping -n 2 127.0.0.1 >nul
   goto waitdb
 )
 echo       database ready.
 
-echo [3/4] Prisma client + schema sync...
+echo [3/4] Prisma client + schema sync + seed...
 call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma generate
-REM db push (not migrate deploy): the schema is multi-file (prisma/schema/), and
-REM "migrate deploy" finds no migrations there and creates no tables. db push syncs it.
+REM db push (not migrate deploy): the schema is multi-file (prisma/schema/), so
+REM "migrate deploy" finds no migrations and creates no tables. db push syncs it.
 call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma db push
-REM First run only - seed demo data (admin@example.com + starter catalog):
-REM   corepack pnpm@9.15.0 --filter @ecommerce/server run prisma:seed
+REM The seed upserts, so it is safe to run on every launch (no duplicates).
+call corepack pnpm@9.15.0 --filter @ecommerce/server run prisma:seed
 
 echo [4/4] Starting apps (fresh compile - clears stale server build)...
 if exist "apps\server\dist" rmdir /s /q "apps\server\dist"
-REM Build once before the watcher starts. "nest start --watch" launches dist/src/main.js
-REM as soon as it appears, so against an empty dist it races the compiler and dies with
-REM "Cannot find module './app.module'" - and the watcher only retries on a file change.
 echo       compiling server once so the watcher does not race an empty dist...
 call corepack pnpm@9.15.0 --filter @ecommerce/server exec nest build
 start "gmc-server" cmd /k "corepack pnpm@9.15.0 --filter @ecommerce/server dev"

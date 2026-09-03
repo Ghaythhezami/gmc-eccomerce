@@ -9,7 +9,7 @@ import { ToastProvider } from './components/Toast';
 import { registerServiceWorker } from './features/notifications/push';
 import './styles.css';
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-not-configured.apps.googleusercontent.com';
 
 // Registered up front so an already-subscribed browser keeps receiving push
 // even before the user visits the notifications page.
