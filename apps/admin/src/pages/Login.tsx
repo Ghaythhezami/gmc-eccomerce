@@ -40,6 +40,7 @@ export function Login() {
   // Google Login Hook
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      console.log("FULL RESPONSE:", tokenResponse);
       try {
         const result = await googleLoginMutation({ 
           googleToken: tokenResponse.access_token 

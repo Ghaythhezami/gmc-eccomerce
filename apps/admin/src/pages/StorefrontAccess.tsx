@@ -35,7 +35,7 @@ export function StorefrontAccess() {
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading || !allRoles.length) return <p>Loading roles...</p>;
 
   return (
     <section className="p-6">

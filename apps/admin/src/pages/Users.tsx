@@ -81,7 +81,7 @@ export function Users() {
                 <td className="px-4 py-3 text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{user.role}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{new Date(user.createdAt || '').toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{new Date(user.createdAt || '').toLocaleDateString('en-GB')}</td>
                 <td className="px-4 py-3">
                   <button 
                     onClick={() => handleDeleteClick(user)} 
