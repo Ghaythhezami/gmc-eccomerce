@@ -8,3 +8,4 @@ coverage/
 .prisma/
 .vite/
 .DS_Store
+*.tsbuildinfo

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/hooks';
 import { setCredentials } from '../features/auth/authSlice';
-import { useLoginMutation, useRegisterMutation } from '../features/auth/authApi';
+import { useLoginMutation, useRegisterMutation, useGoogleLoginMutation } from '../features/auth/authApi';
+import { useGoogleLogin } from '@react-oauth/google';
 import { 
   Lock, 
   Mail, 
@@ -25,6 +26,7 @@ export function AuthPage({ register }: { register: boolean }) {
   
   const [login, { isLoading: isLoggingIn, error: loginError }] = useLoginMutation();
   const [registerUser, { isLoading: isRegistering, error: registerError }] = useRegisterMutation();
+  const [googleLoginMutation] = useGoogleLoginMutation();
   
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -39,11 +41,29 @@ export function AuthPage({ register }: { register: boolean }) {
         : await login({ email: form.email, password: form.password }).unwrap();
       
       dispatch(setCredentials(result));
-      navigate('/profile');
+      navigate('/');
     } catch (err) {
       // Handled via RTK Query state
     }
   };
+
+  // Google Login Hook
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const result = await googleLoginMutation({ 
+          googleToken: tokenResponse.access_token 
+        }).unwrap();
+        dispatch(setCredentials(result));
+        navigate('/');
+      } catch (err) {
+        console.error('Google Login Failed', err);
+      }
+    },
+    onError: () => {
+      console.error('Login Failed');
+    },
+  });
 
   const rawError = (register ? registerError : loginError) as any;
   const displayError = rawError?.data?.message || rawError?.message || 'Authentication failed. Please check your details and try again.';
@@ -241,6 +261,22 @@ export function AuthPage({ register }: { register: boolean }) {
                 )}
               </button>
             </form>
+
+            {/* CUSTOM GOOGLE LOGIN BUTTON (Full Width) */}
+            <div className="flex items-center justify-center">
+              <button 
+                onClick={() => googleLogin()}
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M23.49 12.27C23.49 11.48 23.42 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.39 17.24 16.25 18.07V21.06H19.95C22.22 18.94 23.49 15.9 23.49 12.27Z" fill="#4285F4"/>
+                  <path d="M12 24C15.24 24 17.96 22.92 19.95 21.06L16.25 18.07C15.08 18.84 13.7 19.29 12 19.29C8.87 19.29 6.22 17.21 5.24 14.38H1.38V17.49C3.36 21.42 7.39 24 12 24Z" fill="#34A853"/>
+                  <path d="M5.24 14.38C5.01 13.69 4.88 12.95 4.88 12.2C4.88 11.45 5.01 10.71 5.24 10.02V6.91H1.38C0.5 8.65 0 10.61 0 12.7C0 14.79 0.5 16.75 1.38 18.49L5.24 14.38Z" fill="#FBBC05"/>
+                  <path d="M12 4.71C13.8 4.71 15.41 5.34 16.67 6.55L20.05 3.17C17.96 1.17 15.24 0 12 0C7.39 0 3.36 2.58 1.38 6.51L5.24 9.62C6.22 6.79 8.87 4.71 12 4.71Z" fill="#EA4335"/>
+                </svg>
+                Continue with Google
+              </button>
+            </div>
 
             {/* Toggle Between Login/Register Link */}
             <div className="pt-4 border-t border-[var(--color-border)] text-center">

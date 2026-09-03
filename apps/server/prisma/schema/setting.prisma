@@ -1,0 +1,7 @@
+/// Small key/value store for storefront settings the admin can change without
+/// a deploy - currently the flash-sale banner window and copy.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

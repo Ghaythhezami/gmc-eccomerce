@@ -1,0 +1,11 @@
+/// Storefront newsletter sign-ups. Unsubscribing keeps the row and stamps
+/// unsubscribedAt, so re-subscribing is a resurrection rather than a duplicate.
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  source         String?
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([unsubscribedAt])
+}
