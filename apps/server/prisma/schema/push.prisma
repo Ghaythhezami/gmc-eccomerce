@@ -1,0 +1,15 @@
+/// A browser Push API subscription. One row per browser/device a user has
+/// granted notification permission on, so the same account can be reached
+/// on several machines.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

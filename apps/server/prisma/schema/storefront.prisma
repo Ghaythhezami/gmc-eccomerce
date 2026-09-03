@@ -1,0 +1,5 @@
+model StorefrontAccess {
+  id           String   @id @default(cuid())
+  allowedRoles String[]
+  updatedAt    DateTime @updatedAt
+}

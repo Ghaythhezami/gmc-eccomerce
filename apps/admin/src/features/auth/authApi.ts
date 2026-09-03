@@ -2,6 +2,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../../store';
 
+export interface AdminStats {
+  users: { total: number; admins: number; customers: number };
+  products: { total: number; active: number; hidden: number; outOfStock: number; lowStock: number };
+  categories: { total: number; active: number };
+  orders: { total: number };
+  push: { subscriptions: number };
+  inventory: { unitsInStock: number; averagePrice: number };
+  productsByCategory: { name: string; icon: string | null; count: number }[];
+}
+
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
@@ -12,7 +22,7 @@ export const authApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Users'],
+  tagTypes: ['Users', 'Stats'],
   endpoints: (builder) => ({
     // ADMIN LOGIN
     login: builder.mutation<{ user: any; accessToken: string }, { email: string; password: string }>({
@@ -35,19 +45,24 @@ export const authApi = createApi({
       query: ({ page = 1, limit = 10 }) => `admin/users?page=${page}&limit=${limit}`,
       providesTags: ['Users'],
     }),
+    getStats: builder.query<AdminStats, void>({
+      query: () => 'admin/stats',
+      providesTags: ['Stats'],
+    }),
     // Delete a user
     deleteUser: builder.mutation<void, string>({
       query: (id) => ({ url: `admin/users/${id}`, method: 'DELETE' }),
-      invalidatesTags: ['Users'],
+      invalidatesTags: ['Users', 'Stats'],
     }),
   }),
 });
 
-export const { 
-  useLoginMutation, 
-  useRegisterMutation, 
-  useGetUsersQuery, 
-  useDeleteUserMutation, 
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetUsersQuery,
+  useDeleteUserMutation,
+  useGetStatsQuery,
   useGoogleLoginMutation,
-  useMeQuery
+  useMeQuery,
 } = authApi;

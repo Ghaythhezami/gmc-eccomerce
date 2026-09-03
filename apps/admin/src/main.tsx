@@ -15,23 +15,19 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { store } from './store';
 import './styles.css';
 import { App } from './App';
-
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import { ToastProvider } from './components/Toast';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {googleClientId && (
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <Provider store={store}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </Provider>
-      </GoogleOAuthProvider>
-    )}
+    <Provider store={store}>
+      <BrowserRouter>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </BrowserRouter>
+    </Provider>
   </StrictMode>
 );

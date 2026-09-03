@@ -84,6 +84,15 @@ export class AdminController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @Get('stats')
+  @ApiOperation({ summary: 'Dashboard counts across users, catalog and push' })
+  getStats() {
+    return this.adminService.getStats();
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get('roles')
   @ApiOperation({ summary: 'Get all available roles' })
   getAllRoles() {

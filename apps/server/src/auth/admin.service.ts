@@ -173,6 +173,45 @@ export class AdminService {
     });
   }
 
+  /** Real counts for the admin dashboard - no placeholder figures. */
+  async getStats() {
+    const [
+      totalUsers, admins, totalProducts, activeProducts, outOfStock, lowStock,
+      totalCategories, activeCategories, totalOrders, pushSubscriptions,
+    ] = await this.prisma.$transaction([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { role: Role.ADMIN } }),
+      this.prisma.product.count(),
+      this.prisma.product.count({ where: { isActive: true } }),
+      this.prisma.product.count({ where: { stock: 0 } }),
+      this.prisma.product.count({ where: { stock: { gt: 0, lte: 5 } } }),
+      this.prisma.category.count(),
+      this.prisma.category.count({ where: { isActive: true } }),
+      this.prisma.order.count(),
+      this.prisma.pushSubscription.count(),
+    ]);
+
+    const byCategory = await this.prisma.category.findMany({
+      select: { name: true, icon: true, _count: { select: { products: true } } },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    const inventory = await this.prisma.product.aggregate({ _sum: { stock: true }, _avg: { price: true } });
+
+    return {
+      users: { total: totalUsers, admins, customers: totalUsers - admins },
+      products: { total: totalProducts, active: activeProducts, hidden: totalProducts - activeProducts, outOfStock, lowStock },
+      categories: { total: totalCategories, active: activeCategories },
+      orders: { total: totalOrders },
+      push: { subscriptions: pushSubscriptions },
+      inventory: {
+        unitsInStock: inventory._sum.stock ?? 0,
+        averagePrice: inventory._avg.price ? Number(inventory._avg.price) : 0,
+      },
+      productsByCategory: byCategory.map((c) => ({ name: c.name, icon: c.icon, count: c._count.products })),
+    };
+  }
+
   async getAllRoles() {
     return Object.values(Role);
   }

@@ -1,9 +1,14 @@
 // src/App.tsx
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Shell } from './components/Shell';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
+import { ProductDetail } from './pages/ProductDetail';
 import { Placeholder } from './pages/Placeholder';
+import { Notifications } from './pages/Notifications';
+import { Cart } from './pages/Cart';
+import { NotFound } from './pages/NotFound';
+import { Help } from './pages/Help';
 import { AuthPage } from './pages/AuthPage';
 import { Profile } from './pages/Profile';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -28,18 +33,25 @@ export function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/products/:id" element={<Placeholder name="Product details" />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
+        {/* Same catalog view, pinned to one category by slug. */}
+        <Route path="/category/:slug" element={<Products />} />
         <Route path="/login" element={<AuthPage register={false} />} />
         <Route path="/register" element={<AuthPage register />} />
+        <Route path="/help" element={<Help section="help" />} />
+        <Route path="/support" element={<Help section="support" />} />
+        <Route path="/sell" element={<Help section="sell" />} />
 
         {/* Protected Routes - DYNAMIC ROLE CHECK */}
         {/* Uses allowedRoles from the backend instead of hardcoded ['CUSTOMER'] */}
+        <Route path="/cart" element={<ProtectedRoute roles={allowedRoles}><Cart /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Checkout" /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Orders" /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute roles={allowedRoles}><Profile /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute roles={allowedRoles}><Notifications /></ProtectedRoute>} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* A real 404 - the old catch-all redirect hid genuine dead links. */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Shell>
   );

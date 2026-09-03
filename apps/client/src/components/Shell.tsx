@@ -8,15 +8,19 @@ import { Footer } from './layout/Footer';
 import { Header } from './layout/Header';
 import { TopBar } from './layout/TopBar';
 // 1. Import the API to fetch allowed roles
-import { useGetStorefrontAccessQuery } from '../features/storefront/storefrontApi';
+import { storefrontApi, useGetStorefrontAccessQuery } from '../features/storefront/storefrontApi';
+import { catalogApi } from '../features/catalog/catalogApi';
+import { notificationsApi } from '../features/notifications/notificationsApi';
+import { cartApi } from '../features/cart/cartApi';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
   
-  // 2. DUMMY CART COUNT (since `s.cart` doesn't exist yet, we use 0)
-  const cartCount = 0; 
+  // Fallback only: the header reads the real count from the server cart and
+  // uses this while signed out, when no cart request is made.
+  const cartCount = 0;
 
   // 3. Fetch allowed roles dynamically from the backend
   const { data: accessData, isLoading: isAccessLoading } = useGetStorefrontAccessQuery();
@@ -26,7 +30,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const signOut = () => {
     dispatch(logout());
+    // Every cache holding user-scoped data has to be cleared, not just authApi -
+    // otherwise the next account briefly sees the previous user's notifications.
     dispatch(authApi.util.resetApiState());
+    dispatch(notificationsApi.util.resetApiState());
+    dispatch(cartApi.util.resetApiState());
+    dispatch(catalogApi.util.resetApiState());
+    dispatch(storefrontApi.util.resetApiState());
     navigate('/login');
   };
 
