@@ -22,9 +22,11 @@ if errorlevel 1 (
 )
 echo       database ready.
 
-echo [3/4] Prisma client + migrations...
+echo [3/4] Prisma client + schema sync...
 call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma generate
-call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma migrate deploy
+REM db push (not migrate deploy): the schema is multi-file (prisma/schema/), and
+REM "migrate deploy" finds no migrations there and creates no tables. db push syncs it.
+call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma db push
 REM First run only - seed demo data (admin@example.com + starter catalog):
 REM   corepack pnpm@9.15.0 --filter @ecommerce/server run prisma:seed
 
