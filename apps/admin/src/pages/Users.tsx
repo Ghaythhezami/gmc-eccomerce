@@ -7,7 +7,8 @@ import { Banner, errorMessage } from '../components/ui';
 import { useToast } from '../components/Toast';
 
 export function Users() {
-  const { data: users = [], isLoading, error } = useGetUsersQuery();
+  const { data, isLoading, error } = useGetUsersQuery({});
+  const users: any[] = data?.data ?? [];
   const [deleteUser] = useDeleteUserMutation();
   const me = useAppSelector((s) => s.auth.user);
   const toast = useToast();
