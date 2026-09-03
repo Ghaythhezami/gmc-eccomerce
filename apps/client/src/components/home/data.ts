@@ -6,7 +6,7 @@ export const flashSaleGames = [
 ];
 
 export const featuredGames = [
-  { id: 5, title: "Baldur's Gate 3", price: 59.99, rating: 4.9, reviews: 8934, image: 'https://images.unsplash.com/photo-1612287230217-969b698cb8d1?w=400&h=400&fit=crop' },
+  { id: 5, title: "Baldur's Gate 3", price: 59.99, rating: 4.9, reviews: 8934, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQC6FLtIj5PCHK-bpWB3s0AWH-_6q25L1jgHf8xZetq8mz01h8_122_cXSSG5DhjxlcIgOgcCrHJCY-&s=10&ec=121966398' },
   { id: 6, title: 'Spider-Man 2', price: 69.99, rating: 4.8, reviews: 3421, image: 'https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=400&h=400&fit=crop' },
   { id: 7, title: 'Alan Wake 2', price: 49.99, rating: 4.6, reviews: 2156, image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&h=400&fit=crop' },
   { id: 8, title: 'Resident Evil 4 Remake', price: 39.99, rating: 4.7, reviews: 4567, image: 'https://images.unsplash.com/photo-1551103782-8ab07afd45c1?w=400&h=400&fit=crop' },
