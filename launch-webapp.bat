@@ -48,7 +48,9 @@ echo [3/4] Prisma client + schema sync + seed...
 call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma generate
 REM db push (not migrate deploy): the schema is multi-file (prisma/schema/), so
 REM "migrate deploy" finds no migrations and creates no tables. db push syncs it.
-call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma db push
+REM --accept-data-loss: a dev DB from an earlier schema (e.g. before the googleId
+REM unique constraint) otherwise makes db push fail; the idempotent seed re-populates.
+call corepack pnpm@9.15.0 --filter @ecommerce/server exec prisma db push --accept-data-loss
 REM The seed upserts, so it is safe to run on every launch (no duplicates).
 call corepack pnpm@9.15.0 --filter @ecommerce/server run prisma:seed
 
