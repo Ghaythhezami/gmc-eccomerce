@@ -13,25 +13,29 @@ export const authApi = createApi({
       return headers;
     },
   }),
-  endpoints: (build) => ({
-    register: build.mutation<AuthResponse, { firstName: string; lastName: string; email: string; password: string }>({
+  endpoints: (builder) => ({
+    register: builder.mutation<AuthResponse, { firstName: string; lastName: string; email: string; password: string }>({
       query: (body) => ({
         url: 'auth/register',
         method: 'POST',
         body,
       }),
     }),
-    login: build.mutation<AuthResponse, { email: string; password: string }>({
+    login: builder.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({
         url: 'auth/login',
         method: 'POST',
         body,
       }),
     }),
-    me: build.query<User, void>({
-      query: () => 'users/me',
+    // Google Login mutation
+    googleLogin: builder.mutation<{ user: any; accessToken: string }, { googleToken: string; email?: string; firstName?: string; lastName?: string }>({
+      query: (body) => ({ url: 'auth/google', method: 'POST', body }),
+    }),
+    me: builder.query<User, void>({
+      query: () => 'auth/me',
     }),
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useMeQuery } = authApi;
+export const { useRegisterMutation, useLoginMutation, useGoogleLoginMutation, useMeQuery } = authApi;

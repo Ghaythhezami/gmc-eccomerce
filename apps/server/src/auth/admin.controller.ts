@@ -1,5 +1,5 @@
 // apps/server/src/auth/admin.controller.ts
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -36,9 +36,15 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get('users')
-  @ApiOperation({ summary: 'Get all users' })
-  getAllUsers() {
-    return this.adminService.getAllUsers();
+  @ApiOperation({ summary: 'Get all users (with pagination)' })
+  getAllUsers(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = parseInt(page || '1', 10);
+    const limitNum = parseInt(limit || '10', 10);
+
+    return this.adminService.getAllUsers(pageNum, limitNum);
   }
 
   // PROTECTED (requires ADMIN role)
@@ -78,4 +84,11 @@ export class AdminController {
   getAllRoles() {
     return this.adminService.getAllRoles();
   }
+
+  @Post('auth/google')
+  @ApiOperation({ summary: 'Admin Login with Google' })
+  async adminGoogleLogin(@Body() body: { googleToken: string }) {
+    return this.adminService.validateAdminGoogleToken(body.googleToken);
+  }
 }
+

@@ -28,7 +28,9 @@ export class AuthService {
   }
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
-    if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) throw new UnauthorizedException('Invalid credentials');
+    if (!user || !user.passwordHash || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     if (user.role !== 'CUSTOMER') {
     throw new UnauthorizedException('Invalid credentials'); // Same message, no clue!
@@ -41,4 +43,42 @@ export class AuthService {
     if (!user) throw new UnauthorizedException();
     return this.safeUser(user);
   }
+
+  // NEW: Validate Google token and create/find user
+  async validateGoogleToken(googleToken: string) {
+    try {
+      // 1. Decode the Google token to get user info
+      const payload: any = this.jwt.decode(googleToken);
+
+      // 2. Extract user info from Google
+      const email = payload.email;
+      const firstName = payload.given_name;
+      const lastName = payload.family_name;
+      const googleId = payload.sub;
+
+      // 3. Check if user already exists (by googleId or email)
+      let user = await this.prisma.user.findFirst({
+        where: { OR: [{ googleId }, { email }] },
+      });
+
+      // 4. Create a new user if they don't exist
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            email,
+            firstName,
+            lastName,
+            googleId,
+          },
+        });
+      }
+
+      // 5. Generate your own JWT
+      const accessToken = this.token(user);
+      return { user: this.safeUser(user), accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+  }
+
 }

@@ -16,11 +16,10 @@ export class AdminService {
   async adminLogin(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid admin credentials');
+    if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    // HARD BLOCK: Only allow ADMINS to use this login
     if (user.role !== 'ADMIN') {
       throw new UnauthorizedException('Not authorized for admin access');
     }
@@ -42,7 +41,7 @@ export class AdminService {
         lastName: dto.lastName,
         email: dto.email.toLowerCase(),
         passwordHash: await bcrypt.hash(dto.password, 10),
-        role: 'ADMIN', // <-- Directly set to ADMIN!
+        role: 'ADMIN',
       },
     });
 
@@ -52,11 +51,64 @@ export class AdminService {
     };
   }
 
-  async getAllUsers() {
-    return this.prisma.user.findMany({
-      select: { id: true, firstName: true, lastName: true, email: true, role: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  // NEW: Admin Google Login (Only allow existing ADMINS)
+  async validateAdminGoogleToken(googleToken: string) {
+    try {
+      // 1. Decode the Google token to get user info
+      const payload: any = this.jwt.decode(googleToken);
+
+      // 2. Extract user info from Google
+      const email = payload.email;
+      const googleId = payload.sub;
+
+      // 3. Only allow login if user already exists AND is ADMIN
+      let user = await this.prisma.user.findFirst({
+        where: { OR: [{ googleId }, { email }] },
+      });
+
+      if (!user || user.role !== 'ADMIN') {
+        throw new UnauthorizedException('Only registered admin accounts can access this portal.');
+      }
+
+      // 4. Generate JWT
+      const accessToken = this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
+      return { user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, accessToken };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Invalid Google token');
+    }
+  }
+
+  async getAllUsers(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        skip,
+        take,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      data: users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async deleteUser(id: string) {
@@ -65,7 +117,7 @@ export class AdminService {
     return this.prisma.user.delete({ where: { id } });
   }
 
-    // Get current storefront allowed roles (default to CUSTOMER)
+  // Get current storefront allowed roles (default to CUSTOMER)
   async getStorefrontAccess() {
     const access = await this.prisma.storefrontAccess.findFirst();
     return { allowedRoles: access?.allowedRoles ?? ['CUSTOMER'] };
@@ -86,7 +138,6 @@ export class AdminService {
   }
 
   async getAllRoles() {
-    // Return all enum values from Prisma
     return Object.values(Role);
   }
 }
