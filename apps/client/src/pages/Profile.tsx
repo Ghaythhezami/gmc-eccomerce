@@ -68,8 +68,8 @@ export function Profile() {
           <span>
             <span className="block font-bold">Notifications</span>
             <span className="mt-0.5 block text-sm text-gray-600">
-              {(unread?.count ?? 0) > 0
-                ? `${unread!.count} unread — manage push alerts`
+              {(unread?.unread ?? 0) > 0
+                ? `${unread!.unread} unread — manage push alerts`
                 : 'Manage browser push alerts'}
             </span>
           </span>

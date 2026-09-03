@@ -1,51 +1,82 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
-import { PushService } from './push.service';
+
+interface CreateNotificationInput {
+  type: NotificationType;
+  title: string;
+  message: string;
+  orderId?: string;
+}
 
 @Injectable()
 export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly gateway: NotificationsGateway,
-    private readonly push: PushService,
   ) {}
 
-  /**
-   * Records a notification, mirrors it to any open socket, and pushes it to the
-   * user's registered browsers. Push failures never surface to the caller.
-   */
-  async create(userId: string, title: string, message: string, url?: string) {
-    const notification = await this.prisma.notification.create({ data: { userId, title, message } });
-    this.gateway.emitCreated(notification);
-    await this.push.sendToUser(userId, { title, message, url });
+  /** Persist a notification and push it to the owner's live sockets. */
+  async create(userId: string, input: CreateNotificationInput) {
+    const notification = await this.prisma.notification.create({
+      data: {
+        userId,
+        type: input.type,
+        title: input.title,
+        message: input.message,
+        orderId: input.orderId ?? null,
+      },
+    });
+    this.gateway.emitToUser(userId, 'notification.created', notification);
     return notification;
   }
 
-  async listForUser(userId: string) {
-    return this.prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
+  /**
+   * Create an ORDER_STATUS notification, de-duplicating repeated events: if the
+   * user has already been told this order reached this status, do nothing.
+   */
+  async createOrderStatus(userId: string, orderId: string, status: string) {
+    const message = `Your order #${orderId.slice(-6).toUpperCase()} is now ${status.toLowerCase()}.`;
+    const existing = await this.prisma.notification.findFirst({
+      where: { userId, orderId, type: NotificationType.ORDER_STATUS, message },
     });
+    if (existing) return existing;
+    return this.create(userId, {
+      type: NotificationType.ORDER_STATUS,
+      title: 'Order update',
+      message,
+      orderId,
+    });
+  }
+
+  /** Newest-first page of a user's notifications plus unread/total counts. */
+  async list(userId: string, skip = 0, take = 20) {
+    const [items, total, unread] = await this.prisma.$transaction([
+      this.prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.notification.count({ where: { userId } }),
+      this.prisma.notification.count({ where: { userId, readAt: null } }),
+    ]);
+    return { items, total, unread, skip, take };
   }
 
   async unreadCount(userId: string) {
-    const count = await this.prisma.notification.count({ where: { userId, readAt: null } });
-    return { count };
+    const unread = await this.prisma.notification.count({ where: { userId, readAt: null } });
+    return { unread };
   }
 
   async markRead(userId: string, id: string) {
-    // Scoped by userId so one user cannot mark another user's notification.
-    const { count } = await this.prisma.notification.updateMany({
-      where: { id, userId, readAt: null },
-      data: { readAt: new Date() },
-    });
-    if (count === 0) {
-      const exists = await this.prisma.notification.findFirst({ where: { id, userId }, select: { id: true } });
-      if (!exists) throw new NotFoundException('Notification not found');
+    const notification = await this.prisma.notification.findUnique({ where: { id } });
+    if (!notification || notification.userId !== userId) {
+      throw new NotFoundException('Notification not found');
     }
-    return { id, read: true };
+    if (notification.readAt) return notification;
+    return this.prisma.notification.update({ where: { id }, data: { readAt: new Date() } });
   }
 
   async markAllRead(userId: string) {
@@ -54,26 +85,5 @@ export class NotificationsService {
       data: { readAt: new Date() },
     });
     return { updated: count };
-  }
-
-  /** Admin broadcast: one stored notification per user, one push per device. */
-  async broadcast(title: string, message: string, url?: string) {
-    const users = await this.prisma.user.findMany({ select: { id: true } });
-    if (users.length) {
-      await this.prisma.notification.createMany({
-        data: users.map((user) => ({ userId: user.id, title, message })),
-      });
-    }
-    this.gateway.emitCreated({ title, message, broadcast: true });
-    const result = await this.push.sendToAll({ title, message, url });
-    return { recipients: users.length, ...result };
-  }
-
-  async recentBroadcastable() {
-    return this.prisma.notification.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 25,
-      include: { user: { select: { email: true } } },
-    });
   }
 }

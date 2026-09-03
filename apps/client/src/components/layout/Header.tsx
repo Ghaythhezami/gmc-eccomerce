@@ -1,9 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, HelpCircle, Search, LogOut, Menu, X, Bell } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, User, HelpCircle, Search, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { GoMyCodeGamesLogo } from '../GoMyCodeGamesLogo';
-import { useGetUnreadCountQuery } from '../../features/notifications/notificationsApi';
-import { useGetCartQuery } from '../../features/cart/cartApi';
+import { NotificationBell } from '../../features/notifications/NotificationBell';
 
 interface HeaderProps {
   user: any;
@@ -14,25 +13,6 @@ interface HeaderProps {
 export function Header({ user, cartCount, onSignOut }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
-  // Only signed-in users have notifications, so skip the request otherwise.
-  const { data: unread } = useGetUnreadCountQuery(undefined, { skip: !user });
-  // The badge reflects the server cart, so it survives reloads and other devices.
-  const { data: cart } = useGetCartQuery(undefined, { skip: !user });
-  const liveCartCount = cart?.itemCount ?? cartCount;
-
-  const runSearch = (event?: { preventDefault: () => void }) => {
-    event?.preventDefault();
-    const term = searchQuery.trim();
-    navigate(term ? `/products?q=${encodeURIComponent(term)}` : '/products');
-    setIsMobileMenuOpen(false);
-  };
-
-  // Enter normally submits the form implicitly, but handling the key directly
-  // means search still works if that ever fails to fire.
-  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') runSearch(event);
-  };
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
@@ -48,20 +28,19 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
           </Link>
 
           {/* Search Bar - Desktop Only */}
-          <form onSubmit={runSearch} className="hidden md:flex flex-1 max-w-[500px] lg:max-w-[650px] mx-2 lg:mx-4">
+          <div className="hidden md:flex flex-1 max-w-[500px] lg:max-w-[650px] mx-2 lg:mx-4">
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={onSearchKeyDown}
               className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 border-2 border-[#a34f32] border-r-0 rounded-l-md outline-none bg-[#fffdf8] text-sm focus:shadow-[0_0_0_3px_rgba(163,79,50,0.15)]"
               placeholder="Search games, genres, masterclasses..." 
             />
-            <button type="submit" className="px-4 lg:px-7 bg-[#a34f32] text-white font-semibold rounded-r-md hover:bg-[#8b3f25] transition-colors flex items-center gap-1 lg:gap-2 whitespace-nowrap text-sm">
+            <button className="px-4 lg:px-7 bg-[#a34f32] text-white font-semibold rounded-r-md hover:bg-[#8b3f25] transition-colors flex items-center gap-1 lg:gap-2 whitespace-nowrap text-sm">
               <Search size={18} className="lg:w-5 lg:h-5" />
               <span className="hidden lg:inline">SEARCH</span>
             </button>
-          </form>
+          </div>
 
           {/* Header Actions */}
           <div className="flex items-center gap-2 sm:gap-4 lg:gap-5 flex-shrink-0">
@@ -80,21 +59,6 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
                 </Link>
               )}
               
-              {user && (
-                <Link
-                  to="/notifications"
-                  className="relative flex flex-col items-center px-2 text-xs font-medium text-[#20231f] transition-colors hover:text-[#a34f32]"
-                >
-                  <Bell size={20} className="lg:w-6 lg:h-6" />
-                  <span>Alerts</span>
-                  {(unread?.count ?? 0) > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#c0392b] px-1 text-[10px] font-bold text-white">
-                      {unread!.count > 99 ? '99+' : unread!.count}
-                    </span>
-                  )}
-                </Link>
-              )}
-
               <Link to="/help" className="flex flex-col items-center text-xs font-medium text-[#20231f] hover:text-[#a34f32] transition-colors px-2">
                 <HelpCircle size={20} className="lg:w-6 lg:h-6" />
                 <span>Help</span>
@@ -111,13 +75,16 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
               )}
             </div>
 
+            {/* Real-time notification bell (signed-in customers only) */}
+            {user && <NotificationBell />}
+
             {/* Always Visible: Cart */}
             <Link to="/cart" className="flex flex-col items-center text-xs font-medium text-[#20231f] hover:text-[#a34f32] transition-colors px-1 sm:px-2 relative">
               <ShoppingCart size={20} className="sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
               <span className="hidden sm:inline">Cart</span>
-              {liveCartCount > 0 && (
+              {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#c0392b] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-                  {liveCartCount > 99 ? '99+' : liveCartCount}
+                  {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
             </Link>
@@ -137,19 +104,18 @@ export function Header({ user, cartCount, onSignOut }: HeaderProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-[#c8c4b9] py-4 space-y-4">
             {/* Search Input */}
-            <form onSubmit={runSearch} className="flex items-center">
-              <input
+            <div className="flex items-center">
+              <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={onSearchKeyDown}
                 className="flex-1 px-3 py-2 border-2 border-[#a34f32] border-r-0 rounded-l-md outline-none bg-[#fffdf8] text-sm"
                 placeholder="Search games..." 
               />
-              <button type="submit" className="px-4 py-2 bg-[#a34f32] text-white rounded-r-md hover:bg-[#8b3f25] transition-colors flex items-center justify-center">
+              <button className="px-4 py-2 bg-[#a34f32] text-white rounded-r-md hover:bg-[#8b3f25] transition-colors flex items-center justify-center">
                 <Search size={18} />
               </button>
-            </form>
+            </div>
 
             {/* Navigation Links */}
             <nav className="flex justify-between space-y-2 pt-2">

@@ -22,7 +22,8 @@ function timeAgo(iso: string): string {
 
 export function Notifications() {
   const token = useAppSelector((s) => s.auth.accessToken);
-  const { data: notifications = [], isLoading } = useGetNotificationsQuery();
+  const { data, isLoading } = useGetNotificationsQuery({});
+  const notifications = data?.items ?? [];
   const [markRead] = useMarkReadMutation();
   const [markAllRead, { isLoading: isMarkingAll }] = useMarkAllReadMutation();
 

@@ -1,14 +1,6 @@
-// apps/client/src/features/notifications/notificationsApi.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../../store';
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  readAt: string | null;
-  createdAt: string;
-}
+import type { AppNotification, NotificationPage } from './types';
 
 export const notificationsApi = createApi({
   reducerPath: 'notificationsApi',
@@ -20,23 +12,23 @@ export const notificationsApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Notification'],
-  endpoints: (builder) => ({
-    getNotifications: builder.query<Notification[], void>({
-      query: () => 'notifications',
-      providesTags: ['Notification'],
+  tagTypes: ['Notifications', 'UnreadCount'],
+  endpoints: (build) => ({
+    getNotifications: build.query<NotificationPage, { skip?: number; take?: number }>({
+      query: ({ skip = 0, take = 20 } = {}) => `notifications?skip=${skip}&take=${take}`,
+      providesTags: ['Notifications'],
     }),
-    getUnreadCount: builder.query<{ count: number }, void>({
+    getUnreadCount: build.query<{ unread: number }, void>({
       query: () => 'notifications/unread-count',
-      providesTags: ['Notification'],
+      providesTags: ['UnreadCount'],
     }),
-    markRead: builder.mutation<{ id: string }, string>({
+    markRead: build.mutation<AppNotification, string>({
       query: (id) => ({ url: `notifications/${id}/read`, method: 'PATCH' }),
-      invalidatesTags: ['Notification'],
+      invalidatesTags: ['Notifications', 'UnreadCount'],
     }),
-    markAllRead: builder.mutation<{ updated: number }, void>({
+    markAllRead: build.mutation<{ updated: number }, void>({
       query: () => ({ url: 'notifications/read-all', method: 'PATCH' }),
-      invalidatesTags: ['Notification'],
+      invalidatesTags: ['Notifications', 'UnreadCount'],
     }),
   }),
 });
