@@ -1,18 +1,11 @@
 // apps/admin/src/features/catalog/catalogApi.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../../store';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithAuthHandling } from '../../store/baseQuery';
 import type { Category, CategoryInput, Product, ProductInput } from './types';
 
 export const catalogApi = createApi({
   reducerPath: 'catalogApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) headers.set('authorization', `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuthHandling,
   tagTypes: ['Category', 'Product'],
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], void>({
