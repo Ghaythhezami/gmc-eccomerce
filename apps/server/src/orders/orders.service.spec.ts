@@ -52,10 +52,10 @@ describe('OrdersService.updateStatus', () => {
 
     await service.updateStatus('o1', OrderStatus.PAID);
 
-    expect(order.update).toHaveBeenCalledWith({
-      where: { id: 'o1' },
-      data: { status: OrderStatus.PAID },
-    });
+    // The update also pulls customer + product rows so the admin list can re-render.
+    expect(order.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'o1' }, data: { status: OrderStatus.PAID } }),
+    );
     expect(events.emit).toHaveBeenCalledWith(
       'order.status.changed',
       expect.objectContaining({

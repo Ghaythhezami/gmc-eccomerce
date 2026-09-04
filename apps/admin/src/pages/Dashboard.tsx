@@ -126,7 +126,7 @@ export function Dashboard() {
         <StatCard
           label="Orders"
           value={stats.orders.total}
-          detail="Populated once FEATURE-005 ships"
+          detail="Placed at storefront checkout"
           icon={ShoppingBag}
         />
         <StatCard

@@ -29,11 +29,30 @@ export function OrderDetailPage() {
 
       <ul className="mt-6 divide-y divide-[#e6e2d8] border-y border-[#e6e2d8]">
         {order.items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between py-3 text-sm">
-            <span>
-              Product {item.productId.slice(-6)} × {item.quantity}
+          <li key={item.id} className="flex items-center gap-3 py-3 text-sm">
+            {item.product?.imageUrl && (
+              <img
+                src={item.product.imageUrl}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-md border border-[#e6e2d8] object-cover"
+              />
+            )}
+            <span className="min-w-0 flex-1">
+              {item.product ? (
+                <Link to={`/products/${item.product.slug}`} className="font-medium hover:underline">
+                  {item.product.name}
+                </Link>
+              ) : (
+                // The product row can be gone if the catalog was cleaned up later.
+                <span className="text-gray-500">Product no longer available</span>
+              )}
+              <span className="block text-xs text-gray-500">
+                ${item.unitPrice} × {item.quantity}
+              </span>
             </span>
-            <span className="font-medium">${item.unitPrice}</span>
+            <span className="font-medium">
+              ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+            </span>
           </li>
         ))}
       </ul>

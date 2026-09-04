@@ -82,7 +82,7 @@ export function Profile() {
           <LogOut size={20} className="mt-0.5 shrink-0 rotate-180 text-[#a34f32]" />
           <span>
             <span className="block font-bold">Order history</span>
-            <span className="mt-0.5 block text-sm text-gray-600">Arrives with the orders feature</span>
+            <span className="mt-0.5 block text-sm text-gray-600">Track everything you have ordered</span>
           </span>
         </Link>
       </div>
