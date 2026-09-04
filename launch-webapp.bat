@@ -16,17 +16,21 @@ if not exist "apps\server\.env" (
     echo VAPID_PUBLIC_KEY=
     echo VAPID_PRIVATE_KEY=
     echo VAPID_SUBJECT="mailto:admin@example.com"
+    echo GOOGLE_CLIENT_ID=
   ) > "apps\server\.env"
   echo       created apps\server\.env
 )
 if not exist "apps\client\.env" (
-  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\client\.env"
+  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_ADMIN_URL="http://localhost:5174"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\client\.env"
   echo       created apps\client\.env
 )
 if not exist "apps\admin\.env" (
-  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\admin\.env"
+  ( echo VITE_API_URL="http://localhost:3000/api"& echo VITE_STOREFRONT_URL="http://localhost:5173"& echo VITE_GOOGLE_CLIENT_ID= ) > "apps\admin\.env"
   echo       created apps\admin\.env
 )
+REM GOOGLE_CLIENT_ID / VITE_GOOGLE_CLIENT_ID are intentionally blank: the app runs
+REM fine without them and simply disables the "Continue with Google" button. Fill all
+REM three in (same value) to turn Google sign-in on, then restart this script.
 
 echo [1/4] Starting PostgreSQL (Docker: gmc-postgres, host port 5433)...
 docker start gmc-postgres >nul 2>&1

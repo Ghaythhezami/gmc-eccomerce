@@ -4,6 +4,7 @@ import { useAppDispatch } from '../store/hooks';
 import { setCredentials } from '../features/auth/authSlice';
 import { useLoginMutation, useRegisterMutation, useGoogleLoginMutation } from '../features/auth/authApi';
 import { useGoogleLogin } from '@react-oauth/google';
+import { googleNotConfiguredMessage, isGoogleConfigured } from '../features/auth/googleConfig';
 import { 
   Lock, 
   Mail, 
@@ -263,10 +264,13 @@ export function AuthPage({ register }: { register: boolean }) {
             </form>
 
             {/* CUSTOM GOOGLE LOGIN BUTTON (Full Width) */}
-            <div className="flex items-center justify-center">
-              <button 
+            <div className="flex flex-col items-center justify-center gap-2">
+              <button
+                type="button"
                 onClick={() => googleLogin()}
-                className="w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                disabled={!isGoogleConfigured}
+                title={isGoogleConfigured ? undefined : googleNotConfiguredMessage}
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M23.49 12.27C23.49 11.48 23.42 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.39 17.24 16.25 18.07V21.06H19.95C22.22 18.94 23.49 15.9 23.49 12.27Z" fill="#4285F4"/>
@@ -276,6 +280,9 @@ export function AuthPage({ register }: { register: boolean }) {
                 </svg>
                 Continue with Google
               </button>
+              {!isGoogleConfigured && (
+                <p className="text-center text-xs text-gray-500">Google sign-in is not configured on this environment.</p>
+              )}
             </div>
 
             {/* Toggle Between Login/Register Link */}

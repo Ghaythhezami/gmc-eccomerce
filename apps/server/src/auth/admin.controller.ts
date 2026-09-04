@@ -19,9 +19,13 @@ export class AdminController {
     return this.adminService.adminLogin(body.email, body.password);
   }
 
-  // PUBLIC (only for admins to register - use with caution!)
+  // PROTECTED: only an existing admin may create another admin. Left public this
+  // route let anyone on the internet POST themselves a role=ADMIN account.
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post('auth/register')
-  @ApiOperation({ summary: 'Admin register' })
+  @ApiOperation({ summary: 'Admin: create another admin account' })
   adminRegister(@Body() body: { firstName: string; lastName: string; email: string; password: string }) {
     return this.adminService.adminRegister(body);
   }
