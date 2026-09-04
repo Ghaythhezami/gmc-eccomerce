@@ -16,16 +16,15 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { googleProviderClientId } from './features/auth/googleConfig';
 import { store } from './store';
 import './styles.css';
 import { App } from './App';
 import { ToastProvider } from './components/Toast';
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-not-configured.apps.googleusercontent.com';
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={googleProviderClientId}>
       <Provider store={store}>
         <BrowserRouter>
           <ToastProvider>

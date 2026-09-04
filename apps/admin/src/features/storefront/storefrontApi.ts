@@ -1,6 +1,6 @@
 // apps/admin/src/features/storefront/storefrontApi.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../../store';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithAuthHandling } from '../../store/baseQuery';
 
 export interface FlashSale {
   enabled: boolean;
@@ -24,14 +24,7 @@ export interface NewsletterList {
 
 export const storefrontApi = createApi({
   reducerPath: 'storefrontApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) headers.set('authorization', `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuthHandling,
   tagTypes: ['StorefrontAccess', 'FlashSale', 'Newsletter'],
   endpoints: (builder) => ({
     getStorefrontAccess: builder.query<{ allowedRoles: string[] }, void>({

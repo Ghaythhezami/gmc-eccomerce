@@ -4,9 +4,9 @@ import { Shell } from './components/Shell';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
-import { Placeholder } from './pages/Placeholder';
 import { Notifications } from './pages/Notifications';
 import { Cart } from './pages/Cart';
+import { Checkout } from './pages/Checkout';
 import { NotFound } from './pages/NotFound';
 import { Help } from './pages/Help';
 import { AuthPage } from './pages/AuthPage';
@@ -35,7 +35,7 @@ export function App() {
         <Route path="/support" element={<Help section="support" />} />
         <Route path="/sell" element={<Help section="sell" />} />
         <Route path="/cart" element={<ProtectedRoute roles={allowedRoles}><Cart /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute roles={allowedRoles}><Placeholder name="Checkout" /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute roles={allowedRoles}><Checkout /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute roles={allowedRoles}><OrdersPage /></ProtectedRoute>} />
         <Route path="/orders/:id" element={<ProtectedRoute roles={allowedRoles}><OrderDetailPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute roles={allowedRoles}><Profile /></ProtectedRoute>} />

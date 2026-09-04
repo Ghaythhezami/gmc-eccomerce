@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/hooks';
 import { setCredentials } from '../features/auth/authSlice';
 import { useLoginMutation, useGoogleLoginMutation } from '../features/auth/authApi';
 import { useGoogleLogin } from '@react-oauth/google';
+import { googleNotConfiguredMessage, isGoogleConfigured } from '../features/auth/googleConfig';
 import { 
   Lock, 
   Mail, 
@@ -40,7 +41,6 @@ export function Login() {
   // Google Login Hook
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log("FULL RESPONSE:", tokenResponse);
       try {
         const result = await googleLoginMutation({ 
           googleToken: tokenResponse.access_token 
@@ -183,9 +183,12 @@ export function Login() {
 
             {/* Google Login Button at the BOTTOM */}
             <div className="pt-4 border-t border-border/50">
-              <button 
+              <button
+                type="button"
                 onClick={() => googleLogin()}
-                className="w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                disabled={!isGoogleConfigured}
+                title={isGoogleConfigured ? undefined : googleNotConfiguredMessage}
+                className="w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M23.49 12.27C23.49 11.48 23.42 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.39 17.24 16.25 18.07V21.06H19.95C22.22 18.94 23.49 15.9 23.49 12.27Z" fill="#4285F4"/>
@@ -195,13 +198,15 @@ export function Login() {
                 </svg>
                 Continue with Google
               </button>
+              {!isGoogleConfigured && (
+                <p className="mt-2 text-center text-xs text-gray-500">
+                  Google sign-in is not configured on this environment.
+                </p>
+              )}
             </div>
 
             <div className="pt-2 text-center text-sm text-gray-600">
-              Don't have an admin account?{' '}
-              <Link to="/signup" className="font-bold text-primary hover:underline">
-                Sign up
-              </Link>
+              Admin accounts are created by an existing administrator.
             </div>
 
           </div>

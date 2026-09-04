@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
+import { GoogleTokenVerifier } from './google-token.verifier';
 
 @Module({ 
     imports: [
@@ -19,5 +20,5 @@ import { AdminService } from './admin.service';
             useFactory: (config: ConfigService) => ({ secret: config.getOrThrow('JWT_SECRET'), signOptions: { expiresIn: '1d' } }) 
         })], 
         controllers: [AuthController, AdminController ], 
-        providers: [AuthService, AdminService , JwtStrategy, RolesGuard] })
+        providers: [AuthService, AdminService, GoogleTokenVerifier, JwtStrategy, RolesGuard] })
 export class AuthModule {}

@@ -12,7 +12,6 @@ export function GoMyCodeGamesLogo({ size = '100%', className = '', ...props }: L
       role="img" 
       aria-labelledby="title desc"
       width={size}
-      height="auto"
       className={`inline-block ${className}`}
       {...props}
     >

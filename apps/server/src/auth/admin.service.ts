@@ -1,23 +1,18 @@
 // apps/server/src/auth/admin.service.ts
 import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
-import { OAuth2Client } from 'google-auth-library';
+import { GoogleTokenVerifier } from './google-token.verifier';
 
 @Injectable()
 export class AdminService {
-  private googleClient: OAuth2Client;
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    private readonly config: ConfigService,
-  ) {
-    this.googleClient = new OAuth2Client(this.config.get<string>('GOOGLE_CLIENT_ID'));
-  }
+    private readonly google: GoogleTokenVerifier,
+  ) {}
 
   // Admin-specific login
   async adminLogin(email: string, password: string) {
@@ -58,63 +53,32 @@ export class AdminService {
     };
   }
 
-  // Admin Google Login
+  /**
+   * Admin sign-in with Google.
+   *
+   * This deliberately never creates an account. Google sign-in proves *who* someone is,
+   * not that they are allowed to administer the shop - so the account must already exist
+   * with role ADMIN, granted by an existing admin through POST /admin/auth/register.
+   */
   async validateAdminGoogleToken(googleToken: string) {
-    try {
-      // 1. Get token info
-      const tokenInfo = await this.googleClient.getTokenInfo(googleToken);
-      const googleId = tokenInfo.sub;
+    const { googleId, email } = await this.google.verify(googleToken);
 
-      // 2. Fetch the FULL user profile from Google
-      interface GoogleUserInfo {
-        email: string;
-        given_name?: string;
-        family_name?: string;
-        name?: string;
-      }
+    let user = await this.prisma.user.findFirst({
+      where: { OR: [{ googleId }, { email }] },
+    });
 
-      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${googleToken}` },
-      });
-      const userInfo = (await response.json()) as GoogleUserInfo;
-
-      const email = userInfo.email;
-      const firstName = userInfo.given_name || userInfo.name || 'Google';
-      const lastName = userInfo.family_name || 'User';
-
-      // 3. Check if user exists
-      let user = await this.prisma.user.findFirst({
-        where: { OR: [{ googleId }, { email }] },
-      });
-
-      // 4. Create a new ADMIN if user doesn't exist
-      if (!user) {
-        user = await this.prisma.user.create({
-          data: {
-            email,
-            firstName,
-            lastName,
-            googleId,
-            role: 'ADMIN',
-          },
-        });
-      }
-
-      // 5. Generate JWT
-      const accessToken = this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
-      return { 
-        user: { 
-          id: user.id, 
-          firstName: user.firstName, 
-          lastName: user.lastName, 
-          email: user.email, 
-          role: user.role 
-        }, 
-        accessToken 
-      };
-    } catch (error) {
-      throw new UnauthorizedException('Invalid Google token');
+    if (!user || user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Not authorized for admin access');
     }
+
+    if (!user.googleId) {
+      user = await this.prisma.user.update({ where: { id: user.id }, data: { googleId } });
+    }
+
+    return {
+      user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role },
+      accessToken: this.jwt.sign({ sub: user.id, email: user.email, role: user.role }),
+    };
   }
 
   async getAllUsers(page: number = 1, limit: number = 10) {

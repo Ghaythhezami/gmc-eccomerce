@@ -48,7 +48,7 @@ function StatCard({
 }
 
 export function Dashboard() {
-  const { data: stats, isLoading, isError } = useGetStatsQuery();
+  const { data: stats, isLoading, isError, error, refetch } = useGetStatsQuery();
 
   if (isLoading) {
     return (
@@ -65,12 +65,30 @@ export function Dashboard() {
   }
 
   if (isError || !stats) {
+    // A bare FETCH_ERROR means the request never reached the API; anything else came
+    // back from it, so telling the admin to "check port 3000" would send them hunting
+    // in the wrong place.
+    const status = (error as { status?: number | string } | undefined)?.status;
+    const unreachable = status === 'FETCH_ERROR';
+
     return (
       <section>
         <p className="eyebrow">Admin / Overview</p>
         <h1 className="font-display text-2xl font-extrabold">Dashboard</h1>
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
-          Could not load dashboard statistics. Check that the API is running on port 3000.
+          <p className="font-bold">Could not load dashboard statistics.</p>
+          <p className="mt-1">
+            {unreachable
+              ? 'The API did not respond. Start it with pnpm --filter @ecommerce/server dev, and make sure the gmc-postgres container is running on port 5433 (the server exits at boot if the database is unreachable).'
+              : `The API responded with an error${status ? ` (${status})` : ''}. Check the server logs for details.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-3 rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-800 transition hover:bg-red-100"
+          >
+            Retry
+          </button>
         </div>
       </section>
     );
@@ -108,7 +126,7 @@ export function Dashboard() {
         <StatCard
           label="Orders"
           value={stats.orders.total}
-          detail="Populated once FEATURE-005 ships"
+          detail="Placed at storefront checkout"
           icon={ShoppingBag}
         />
         <StatCard

@@ -5,12 +5,12 @@ import { logout } from './features/auth/authSlice';
 import { authApi } from './features/auth/authApi';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
-import { Placeholder } from './pages/Placeholder';
 import { Users } from './pages/Users';
 import { Categories } from './pages/Categories';
 import { Products } from './pages/Products';
 import { Notifications } from './pages/Notifications';
 import { Marketing } from './pages/Marketing';
+import { Orders } from './pages/Orders';
 import { StorefrontAccess } from './pages/StorefrontAccess'; // <-- Import
 import { NotificationBell } from './features/notifications/NotificationBell';
 import { ToastHost } from './features/notifications/ToastHost';
@@ -36,7 +36,6 @@ import {
 // The storefront is a separate Vite app, so this is a real navigation, not a route.
 const STOREFRONT_URL = import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:5173';
 
-// Catalog pages are fully built; these two are still feature-ticket placeholders.
 const pages = [{ name: 'Orders', path: '/orders', icon: ShoppingBag }];
 
 export function AdminLayout() {
@@ -244,13 +243,7 @@ export function AdminLayout() {
             <Route path="/products" element={<Products />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/marketing" element={<Marketing />} />
-            {pages.map((page) => (
-              <Route 
-                key={page.name} 
-                path={page.path} 
-                element={<Placeholder name={page.name} />} 
-              />
-            ))}
+            <Route path="/orders" element={<Orders />} />
           </Routes>
         </main>
       </article>

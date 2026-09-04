@@ -6,6 +6,7 @@ export interface OrderItem {
   productId: string;
   quantity: number;
   unitPrice: string;
+  product: { id: string; name: string; slug: string; imageUrl: string | null } | null;
 }
 
 export interface Order {
@@ -36,7 +37,13 @@ export const ordersApi = createApi({
       query: (id) => `orders/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Orders', id }],
     }),
+    // Only product ids and quantities go up: the server snapshots prices and
+    // computes the total, and clears the ordered lines from the cart.
+    createOrder: build.mutation<Order, { items: { productId: string; quantity: number }[] }>({
+      query: (body) => ({ url: 'orders', method: 'POST', body }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
-export const { useGetMyOrdersQuery, useGetOrderQuery } = ordersApi;
+export const { useGetMyOrdersQuery, useGetOrderQuery, useCreateOrderMutation } = ordersApi;
